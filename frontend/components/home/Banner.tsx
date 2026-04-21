@@ -51,12 +51,25 @@ export default function Banner() {
     );
   }
 
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return "";
+    if (imagePath.startsWith("http")) return imagePath;
+    
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    // Jika path sudah mengandung 'assets', gunakan apa adanya, jika tidak tambahkan path lengkap
+    const finalPath = imagePath.startsWith("assets") 
+      ? `/${imagePath}` 
+      : `/assets/img/banner/${imagePath}`;
+      
+    return `${baseUrl}${finalPath}`;
+  };
+
   return (
     <div className="relative w-full mb-8 group">
       {/* Banner Image Display */}
       <div className="w-full h-[250px] rounded-xl overflow-hidden shadow-sm relative">
         <img
-          src={banners[currentSlide].image}
+          src={getImageUrl(banners[currentSlide].image)}
           alt={banners[currentSlide].title}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
         />

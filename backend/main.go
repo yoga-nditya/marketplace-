@@ -19,6 +19,8 @@ func main() {
 		AllowMethods: "GET, POST, PUT, DELETE",
 	}))
 
+	app.Static("/assets", "./assets")
+
 	routes.SetupRoutes(app)
 
 	log.Fatal(app.Listen(":3000"))
