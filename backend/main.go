@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"log"
 	"marketplace-backend/config"
 	"marketplace-backend/routes"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
@@ -20,7 +21,6 @@ func main() {
 	}))
 
 	app.Static("/assets", "./assets")
-
 	routes.SetupRoutes(app)
 
 	log.Fatal(app.Listen(":3000"))

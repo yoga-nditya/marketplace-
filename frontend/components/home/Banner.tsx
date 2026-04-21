@@ -34,6 +34,17 @@ export default function Banner() {
     setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
   };
 
+  // Auto-slide effect
+  useEffect(() => {
+    if (banners.length <= 1) return;
+
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 5000); // Change slide every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [banners.length]); // Re-run if banner count changes
+
   if (loading) {
     return (
       <div className="w-full h-[250px] rounded-xl mb-8 bg-gray-100 flex items-center justify-center animate-pulse">
@@ -54,14 +65,14 @@ export default function Banner() {
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "";
     if (imagePath.startsWith("http")) return imagePath;
-    
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    // Jika path sudah mengandung 'assets', gunakan apa adanya, jika tidak tambahkan path lengkap
-    const finalPath = imagePath.startsWith("assets") 
-      ? `/${imagePath}` 
-      : `/assets/img/banner/${imagePath}`;
-      
-    return `${baseUrl}${finalPath}`;
+
+    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000").replace(/\/$/, "");
+    let cleanPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+    if (!cleanPath.includes("/assets/")) {
+      cleanPath = `/assets/img/banner${cleanPath}`;
+    }
+
+    return `${baseUrl}${cleanPath}`;
   };
 
   return (
@@ -73,21 +84,17 @@ export default function Banner() {
           alt={banners[currentSlide].title}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
         />
-        {/* Overlay Title if desired (optional based on aesthetic preference) */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-6 pt-10">
-          <h2 className="text-white text-xl font-bold line-clamp-1">{banners[currentSlide].title}</h2>
-        </div>
       </div>
 
       {/* Navigation Arrows */}
-      <button 
+      <button
         onClick={prevSlide}
         className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 active:scale-90"
         aria-label="Previous slide"
       >
         <ChevronLeft size={24} className="text-gray-700" />
       </button>
-      <button 
+      <button
         onClick={nextSlide}
         className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 active:scale-90"
         aria-label="Next slide"
@@ -101,11 +108,10 @@ export default function Banner() {
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-              index === currentSlide 
-                ? "bg-purple-600 w-6" 
+            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentSlide
+                ? "bg-purple-600 w-6"
                 : "bg-gray-300 hover:bg-gray-400"
-            }`}
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
