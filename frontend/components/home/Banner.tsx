@@ -34,16 +34,15 @@ export default function Banner() {
     setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
   };
 
-  // Auto-slide effect
   useEffect(() => {
     if (banners.length <= 1) return;
 
     const interval = setInterval(() => {
       nextSlide();
-    }, 5000); // Change slide every 5 seconds
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [banners.length]); // Re-run if banner count changes
+  }, [banners.length]);
 
   if (loading) {
     return (
@@ -66,7 +65,7 @@ export default function Banner() {
     if (!imagePath) return "";
     if (imagePath.startsWith("http")) return imagePath;
 
-    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000").replace(/\/$/, "");
+    const baseUrl = (process.env.NEXT_PUBLIC_API_URL);
     let cleanPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
     if (!cleanPath.includes("/assets/")) {
       cleanPath = `/assets/img/banner${cleanPath}`;
@@ -109,8 +108,8 @@ export default function Banner() {
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentSlide
-                ? "bg-purple-600 w-6"
-                : "bg-gray-300 hover:bg-gray-400"
+              ? "bg-purple-600 w-6"
+              : "bg-gray-300 hover:bg-gray-400"
               }`}
             aria-label={`Go to slide ${index + 1}`}
           />
