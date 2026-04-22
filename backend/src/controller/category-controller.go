@@ -16,11 +16,11 @@ func GetCategories(c *fiber.Ctx) error {
 
 	if len(categories) == 0 {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"data": []any{},
+			"Categorydata": []any{},
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"data": categories,
+		"Categorydata": categories,
 	})
 }

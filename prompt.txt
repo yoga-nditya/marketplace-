@@ -1,36 +1,83 @@
-uatkan issue.md yang berisi perencanaan untuk nanti di implementasikan untuk junior programmer atau model ai yang  lebih murah
+buatkan issue.md yang berisi perencanaan untuk nanti di implementasikan untuk junior programmer atau model ai yang  lebih murah
 
 isi dari planing nya adalah sebagai berikut : 
 
-buatkan api untuk get categories 
+buatkan api untuk get products 
 
-endpoint : GET /api/categories
+endpoint : GET /api/products
 
 untuk response nya menyesuaikan di database seperti gambar yang saya berikan tolong keluarkan semua field saya
 
-struktur folder di dalam src/categories : 
+struktur folder di dalam src/products : 
 - routes : berisi routing
 - service : berisi logic aplikasi
 
 struktur file : 
-- routes : menggunakan format misal banner-route.ts
-- service : menggunakan format misal banner-service.ts
+- routes : menggunakan format misal products-route.ts
+- service : menggunakan format misal products-service.ts
 
-penerapan nya mirip seperti yang sudah ada seperti kode banner sekarang 
+penerapan nya mirip seperti yang sudah ada seperti kode categories sekarang 
 
 response body (succsess) :
 {
     data : {
-        id : ""
-        name : ""
-        image : ""
-        slug : ""
+        id : "string"
+        categories_id : "string"
+        name : "string"
+        image : "string"
+        slug : "string"
+        price : "int"
+        stock_amount : "int"
     }
 }
 
 response body (error) :
 {
     error : "unautorized"
+    error : "bad request"
 }
 
-jelaskan tahapan2 yang harus dilakukan untuk implementasi fitur ini anggap nanti yang mengimplementasikan adalah junior programmer atau mode ai yang lebih murah 
+jelaskan tahapan2 yang harus dilakukan untuk implementasi fitur ini anggap nanti yang mengimplementasikan adalah junior programmer atau mode ai yang lebih murah
+dan tidak perlu penjelasan dengan kode hanya detail apa saja yang harus dilakukan 
+
+
+
+
+
+
+
+- buatkan issue.md yang berisi perencanaan untuk nanti di implementasikan untuk junior programmer atau model ai yang  lebih murah
+
+isi dari planing nya adalah sebagai berikut : 
+
+buatkan agar halaman home yang ada tabs categories fetch ke api/categories yang sudah ada
+dimana response nya adalah :
+
+{
+    "Categorydata": [
+        {
+            "id": "string",
+            "name": "string",
+            "image": "string",
+            "slug": "string"
+        },
+    ]
+}
+
+dan untuk card nya fetch ke api/products 
+
+dimana response nya adalah :
+
+{
+    "Categorydata": [
+        {
+            "id": "string",
+            "name": "string",
+            "image": "string",
+            "slug": "string"
+        },
+    ]
+}
+
+jelaskan tahapan2 yang harus dilakukan untuk implementasi fitur ini anggap nanti yang mengimplementasikan adalah junior programmer atau mode ai yang lebih murah
+dan tidak perlu penjelasan dengan kode hanya detail apa saja yang harus dilakukan 

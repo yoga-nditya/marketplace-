@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"github.com/gofiber/fiber/v2"
 	srcRoutes "marketplace-backend/src/routes"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func SetupRoutes(app *fiber.App) {
@@ -10,10 +11,4 @@ func SetupRoutes(app *fiber.App) {
 
 	srcRoutes.SetupBannerRoutes(api)
 	srcRoutes.SetupCategoryRoutes(api)
-
-	api.Get("/hello", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"message": "Halo dari Golang Fiber!",
-		})
-	})
 }
