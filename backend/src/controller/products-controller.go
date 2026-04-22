@@ -6,25 +6,21 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetBanners(c *fiber.Ctx) error {
-	banners, err := service.GetAllBanners()
+func GetProducts(c *fiber.Ctx) error {
+	products, err := service.GetAllProducts()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "error",
+			"error": "internal server error",
 		})
 	}
 
-	if len(banners) == 0 {
+	if len(products) == 0 {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"status": "success",
-			"total":  0,
-			"data":   []any{},
+			"Productdata": []any{},
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":     "success",
-		"total":      len(banners),
-		"Bannerdata": banners,
+		"Productdata": products,
 	})
 }

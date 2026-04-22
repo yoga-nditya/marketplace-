@@ -1,311 +1,106 @@
-# [Feature] Fetch Banner dari API dan Tampilkan di Frontend
+# Issue: Implementasi API GET /api/products
 
-## 📋 Description
+## Deskripsi
 
-Backend sudah menyediakan endpoint `GET /api/banners`.
-Komponen `Banner.tsx` saat ini masih menggunakan data hardcode.
+Tambahkan endpoint baru untuk mengambil data list produk dari database.
 
-Tujuan issue ini: **ganti mock data di `Banner.tsx` dengan data nyata dari API**.
+- **Endpoint:** `GET /api/products`
+- **Method:** GET
 
 ---
 
-## 🔍 Context
+## Expected Response
 
-### Endpoint
-
-```
-GET /api/banners
-```
-
-### Response Shape
+### Success (200 OK)
 
 ```json
 {
-  "status": "success",
-  "total": 2,
-  "Bannerdata": [
+  "data": [
     {
-      "id": "string (uuid)",
-      "title": "string",
-      "image": "string (url)",
-      "is_active": true
+      "id": "string",
+      "categories_id": "string",
+      "name": "string",
+      "image": "string",
+      "slug": "string",
+      "price": 10000,
+      "stock_amount": 10
     }
   ]
 }
 ```
 
-> ⚠️ Key array-nya adalah `Bannerdata` (huruf besar B, bukan `data` atau `banners`).
+### Error responses
 
----
-
-## 📁 Files Affected
-
-| File | Action |
-|------|--------|
-| `frontend/services/bannerService.ts` | CREATE |
-| `frontend/components/home/Banner.tsx` | MODIFY |
-
----
-
-## ✅ Tasks
-
-### 1. Create `frontend/services/bannerService.ts`
-
-Buat folder `services/` di dalam `frontend/`, lalu buat file `bannerService.ts`.
-
-File ini berisi:
-- Type `Banner` — merepresentasikan satu objek banner dari API (`id`, `title`, `image`, `is_active`).
-- Type `BannerApiResponse` — merepresentasikan full response API (`status`, `total`, `Bannerdata`).
-- Fungsi async `fetchBanners()` — memanggil `GET /api/banners` menggunakan `NEXT_PUBLIC_API_URL` dari env, mengembalikan array `Banner[]`, dan mengembalikan `[]` jika data kosong atau `total === 0`.
-
----
-
-### 2. Modify `frontend/components/home/Banner.tsx`
-
-Ubah komponen yang ada dengan ketentuan:
-- Tambah state `banners` (array `Banner[]`, default `[]`) untuk menyimpan data dari API.
-- Tambah state `loading` (boolean, default `true`) untuk menampilkan loading state.
-- Gunakan `useEffect` dengan dependency array kosong `[]` untuk memanggil `fetchBanners()` sekali saat komponen pertama kali render. Simpan hasilnya ke state `banners`, dan set `loading` ke `false` setelah selesai (baik sukses maupun error).
-- Saat `loading === true`, tampilkan placeholder teks "Memuat banner...".
-- Saat `banners.length === 0` (setelah loading selesai), tampilkan teks "Tidak ada banner tersedia.".
-- Ganti tampilan konten slide dari teks menjadi tag `<img>` yang mengambil `src` dari `banners[currentSlide].image` dan `alt` dari `banners[currentSlide].title`.
-- Logika prev/next dan dots indicator **tidak perlu diubah**.
-
----
-
-## 📌 Notes
-
-- Jangan ubah logika prev/next dan dots indicator — hanya sumber datanya yang diganti.
-- Tampilkan semua data yang dikembalikan API tanpa filter `is_active` di frontend.
-
----
-
-## 🔗 Related
-
-- Backend controller: `backend/src/controller/banner-controller.go`
-- Backend model: `backend/src/model/banner-model.go`
-
----
-
-# [Archived] Issue: Implementasi API GET /api/banners
-
-## Deskripsi
-
-Buat endpoint REST API untuk mengambil semua data banner yang akan ditampilkan di halaman utama marketplace.
-
-- **Method:** `GET`
-- **Endpoint:** `/api/banners`
-
----
-
-## Struktur Folder yang Harus Dibuat
-
-Implementasi ini menggunakan pola **Layered Architecture** global di dalam folder `backend/src/`. Tidak perlu membuat folder khusus per modul/fitur.
-
+```json
+{
+  "error": "unautorized"
+}
 ```
-backend/
-└── src/
-    ├── controller/
-    │   └── banner-controller.go
-    ├── model/
-    │   └── banner-model.go
-    ├── repository/
-    │   └── banner-repository.go
-    ├── routes/
-    │   └── banner-route.go
-    └── service/
-        └── banner-service.go
+
+```json
+{
+  "error": "bad request"
+}
 ```
 
 ---
 
-## Konteks Proyek (Baca Dulu!)
+## Referensi
 
-Sebelum mulai, pahami pola yang sudah ada di proyek ini:
+Penerapannya mirip seperti fitur **categories** yang sudah dibuat sebelumnya. Tetap gunakan bahasa pemrograman **Golang**, tapi kali ini struktur foldernya sedikit diperbarui agar lebih rapi per-fitur (module-based):
 
-| Hal | Detail |
-|---|---|
-| Framework | Go Fiber v2 (`github.com/gofiber/fiber/v2`) |
-| ORM | GORM (`gorm.io/gorm`) |
-| Database | MySQL |
-| Module name | `marketplace-backend` (lihat `go.mod`) |
-| Koneksi DB | Sudah tersedia di `config.DB` (dari `backend/config/database.go`) |
-| Entry point | `backend/main.go` — routes didaftarkan via `routes.SetupRoutes(app)` |
-| Registrasi route | Semua route dipanggil dari `backend/routes/routes.go` |
+Instruksi struktur folder di dalam `src/products/`:
+- `routes/` : berisi routing
+- `service/` : berisi logic aplikasi
+- (Gunakan juga sub-folder `model/`, `repository/`, dan `controller/` di bawah `src/products/` agar sesuai pola arsitektur layer).
+
+Format penamaan file:
+- File dalam folder menggunakan format `products-<layer>.go`.
+*(Catatan revisi: Instruksi asli menyebutkan ekstensi `.ts`, namun karena aplikasi backend menggunakan Fiber/Golang, kita menggunakan ekstensi `.go`)*
 
 ---
 
 ## Tahapan Implementasi
 
-### Tahap 1 — Buat Model Banner
+> Ikuti penjelasan tahapan di bawah ini untuk membuat endpoint API Products.
 
-> **Tujuan:** Mendefinisikan struct Go yang merepresentasikan tabel `banners` di database.
+### Tahap 1 — Pembuatan Model (`src/products/model/products-model.go`)
+- Buat struct `Product` yang mencakup seluruh field yang diminta: `id` (string), `categories_id` (string), `name` (string), `image` (string), `slug` (string), `price` (int), dan `stock_amount` (int).
+- Berikan tag GORM dan tag JSON yang sesuai untuk memetakan struct tersebut ke kolom database yang ada. 
+- Tambahkan metod `TableName()` sehingga GORM mengetahui tabel mana yang dituju (sepertinya tabel `products`).
 
-**File:** `backend/src/model/banner-model.go`
+### Tahap 2 — Pembuatan Repository (`src/products/repository/products-repository.go`)
+- Di layer ini, buat satu fungsi khusus yang memiliki tugas melakukan *query* ke database dengan menggunakan koneksi database GORM `config.DB`.
+- Lakukan operasi *find all* terhadap tabel products.
+- Return (kembalikan) hasil query dalam bentuk slice/array dari *struct* `Product`. Pastikan mengembalikan data beserta status error-nya.
 
-Buat struct `Banner` sesuai dengan skema tabel di database:
+### Tahap 3 — Pembuatan Service (`src/products/service/products-service.go`)
+- Layer ini menjadi perantara fungsionalitas alias *logic* aplikasi.
+- Buat sebuah fungsi yang bertugas memanggil fungsi repository yang sudah dibuat di Tahap 2. 
+- Kembalikan data dan error kembali ke atas untuk diterima oleh controller.
 
-| Field Go | Tipe | Tag JSON | Tag GORM | Keterangan |
-|---|---|---|---|---|
-| `ID` | `string` | `"id"` | `primaryKey` | UUID char(36) |
-| `Title` | `string` | `"title"` | `column:title` | Judul banner |
-| `Image` | `string` | `"image"` | `column:image` | Nama/path file gambar |
-| `IsActive` | `bool` | `"is_active"` | `column:is_active` | Status aktif |
-| `DeletedAt` | `*time.Time` | `"deleted_at"` | `column:deleted_at` | Soft delete |
-| `CreatedAt` | `*time.Time` | `"created_at"` | `column:created_at` | Waktu dibuat |
-| `UpdatedAt` | `*time.Time` | `"updated_at"` | `column:updated_at` | Waktu diupdate |
+### Tahap 4 — Pembuatan Controller (`src/products/controller/products-controller.go`)
+- Di Controller, definisikan fungsi handler yang menerima request dari endpoint (menggunakan context `fiber.Ctx`).
+- Controller bertugas mengambil data dari Service.
+- Lakukan pengecekan error:
+  - Jika terjadi error unauthorized atau bad request, kembalikan JSON struct dengan key `"error"` dengan HTTP status yang tepat (400 atau 401).
+- Jika berhasil (data ditemukan atau pun nilainya array kosong), ubah hasil tersebut menjadi format yang diminta, lalu return menggunakan status `200 OK` di mana *array of products* dibungkus ke dalam JSON object ber-key `"data"`.
 
-```go
-package model
+### Tahap 5 — Pembuatan Route (`src/products/routes/products-route.go`)
+- Buat fungsi yang menerima objek `fiber.Router`.
+- Gunakan fungsi router ini untuk mendaftarkan path `/products` dengan method HTTP `GET`.
+- Arahkan endpoint ini langsung ke fungsi controller yang baru saja selesai ditulis.
 
-import "time"
-
-type Banner struct {
-    ID        string     `json:"id"         gorm:"primaryKey;column:id"`
-    Title     string     `json:"title"      gorm:"column:title"`
-    Image     string     `json:"image"      gorm:"column:image"`
-    IsActive  bool       `json:"is_aktif"    gorm:"column:is_active"`
-    DeletedAt *time.Time `json:"deleted_at"  gorm:"column:deleted_at"`
-    CreatedAt *time.Time `json:"created_at"  gorm:"column:created_at"`
-    UpdatedAt *time.Time `json:"updated_at"  gorm:"column:updated_at"`
-}
-
-func (Banner) TableName() string { return "banners" }
-```
+### Tahap 6 — Pendaftaran ke File Routing Utama (`backend/routes/routes.go`)
+- Buka file utama di `backend/routes/routes.go`.
+- Modifikasi file ini untuk melakukan import modul `routes` dari *products* yang telah dibuat.
+- Daftarkan rute produk tersebut ke dalam block route group `/api` yang sudah ada, sehingga ketika aplikasi berjalan, rutenya akan bisa diakses melalui `/api/products`.
 
 ---
 
-### Tahap 2 — Buat Repository Banner
+## Verifikasi
+Setelah diimplementasikan seluruhnya, pastikan menguji endpoint:
+1. Pastikan project ter-build dan bisa berjalan tanpa peringatan (`go build ./...` dan `go run main.go`).
+2. Tembak endpoint `GET /api/products` dengan tools API testing.
+3. Cek kembali format response yang ada apakah semuanya sudah tertampil dan memiliki *field* id, categories_id, name, image, slug, price, dan stock_amount.
 
-> **Tujuan:** Menangani query langsung ke database.
-
-**File:** `backend/src/repository/banner-repository.go`
-
-```go
-package repository
-
-import (
-    "marketplace-backend/config"
-    "marketplace-backend/src/model"
-)
-
-func GetAllBanners() ([]model.Banner, error) {
-    var banners []model.Banner
-    err := config.DB.Find(&banners).Error
-    return banners, err
-}
-```
-
----
-
-### Tahap 3 — Buat Service Banner
-
-> **Tujuan:** Layer logika bisnis.
-
-**File:** `backend/src/service/banner-service.go`
-
-```go
-package service
-
-import (
-    "marketplace-backend/src/model"
-    "marketplace-backend/src/repository"
-)
-
-func GetAllBanners() ([]model.Banner, error) {
-    return repository.GetAllBanners()
-}
-```
-
----
-
-### Tahap 4 — Buat Controller Banner
-
-> **Tujuan:** Menangani HTTP request dan mengembalikan JSON response.
-
-**File:** `backend/src/controller/banner-controller.go`
-
-```go
-package controller
-
-import (
-    "marketplace-backend/src/service"
-    "github.com/gofiber/fiber/v2"
-)
-
-func GetBanners(c *fiber.Ctx) error {
-    banners, err := service.GetAllBanners()
-    if err != nil {
-        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-            "success": false,
-            "message": "Gagal mengambil data banner",
-        })
-    }
-    return c.JSON(fiber.Map{
-        "success": true,
-        "data": banners,
-    })
-}
-```
-
----
-
-### Tahap 5 — Buat Route Banner
-
-> **Tujuan:** Definisi endpoint khusus banner.
-
-**File:** `backend/src/routes/banner-route.go`
-
-```go
-package routes
-
-import (
-    "marketplace-backend/src/controller"
-    "github.com/gofiber/fiber/v2"
-)
-
-func SetupBannerRoutes(api fiber.Router) {
-    api.Get("/banners", controller.GetBanners)
-}
-```
-
----
-
-### Tahap 6 — Pendaftaran di Router Utama
-
-**File:** `backend/routes/routes.go`
-
-Tambahkan pemanggilan route banner:
-
-```go
-import (
-    bannerRoutes "marketplace-backend/src/routes"
-)
-
-func SetupRoutes(app *fiber.App) {
-    api := app.Group("/api")
-    bannerRoutes.SetupBannerRoutes(api)
-}
-```
-
----
-
-## Checklist Implementasi
-
-- [ ] Struct `Banner` (Model)
-- [ ] Fungsi `GetAllBanners` (Repository)
-- [ ] Fungsi `GetAllBanners` (Service)
-- [ ] Fungsi `GetBanners` (Controller)
-- [ ] Fungsi `SetupBannerRoutes` (Routes)
-- [ ] Registrasi di `routes/routes.go`
-- [ ] Test endpoint `GET /api/banners`
-
----
-
-## Hal Penting untuk Junior Developer
-
-> [!IMPORTANT]
-> - Gunakan tipe `string` untuk ID karena di DB menggunakan `char(36)`.
-> - Gunakan pointer `*time.Time` untuk field yang bisa bernilai NULL di database.
-> - Pastikan folder `src` sudah dibuat dengan benar sebelum membuat file di dalamnya.
-> - Jalankan `go mod tidy` jika ada error paket tidak ditemukan.

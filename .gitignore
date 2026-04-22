@@ -1,0 +1,6 @@
+/backend/tmp
+/backend/build-errors.log
+/backend/main.exe
+node_modules/
+.DS_Store
+.env
