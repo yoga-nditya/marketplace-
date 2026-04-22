@@ -1,18 +1,18 @@
-# Issue: Backend - Implementasi API GET /api/products & Frontend - Integrasi Fetch API
+# Issue: Implementasi API GET /api/products
 
 ## Deskripsi
 
-Issue ini mencakup dua bagian utama (Backend dan Frontend) yang harus dikerjakan:
-1. **Backend**: Membuat endpoint baru untuk melayani request data via `GET /api/products`.
-2. **Frontend**: Melakukan fetching/integrasi dinamis pada halaman Home agar Tab Kategori memanggil endpoint `/api/categories` (yang sudah ada), dan komponen Cards Produk memanggil endpoint `/api/products`.
+Tambahkan endpoint baru untuk mengambil data list produk dari database.
+
+- **Endpoint:** `GET /api/products`
+- **Method:** GET
 
 ---
 
-## Bagian 1: Backend - Endpoint GET /api/products
+## Expected Response
 
-### Expected API Response
+### Success (200 OK)
 
-**Success (200 OK):**
 ```json
 {
   "data": [
@@ -23,93 +23,84 @@ Issue ini mencakup dua bagian utama (Backend dan Frontend) yang harus dikerjakan
       "image": "string",
       "slug": "string",
       "price": 10000,
-      "stock_amount": 50
+      "stock_amount": 10
     }
   ]
 }
 ```
 
-**Error Response:**
+### Error responses
+
 ```json
-{ "error": "unauthorized" }
-// atau
-{ "error": "bad request" }
+{
+  "error": "unautorized"
+}
 ```
 
-### Struktur File Backend yang Terlibat
-> *Catatan:* Ekstensi mengikuti backend yang ditulis menggunakan bahasa Go (`.go`). Sesuaikan pola ini dengan pola pada fitur `categories` sebelumnya.
-- `backend/src/model/product-model.go` (Baru)
-- `backend/src/repository/product-repository.go` (Baru)
-- `backend/src/service/product-service.go` (Baru)
-- `backend/src/controller/product-controller.go` (Baru)
-- `backend/src/routes/product-route.go` (Baru)
-- `backend/routes/routes.go` (Dimodifikasi)
-
-### Tahapan Pengerjaan Backend
-
-> **PENGINGAT UNTUK JUNIOR / AI:** Jangan merujuk atau menuliskan cuplikan baris kode. Cukup pahami instruksi logis untuk setiap *layering* berikut dan ikuti gayanya dari *source-code categories*. Kerjakan secara berurutan.
-
-1. **Model:** Buat struct `Product` dengan field: `id`, `categories_id`, `name`, `image`, `slug`, `price`, dan `stock_amount`. Sisipkan pemetaan tag JSON/GORM, dan jangan lupa method penanda `TableName` berisi identifier ke tabel `products`.
-2. **Repository:** Buat query pengambilan dari seluruh data `products` menggunakan GORM (`config.DB`), berikan nilai baliknya dalam bentuk array/slice serta state error.
-3. **Service:** Bertindak sebagai *pipeline*, tempat logika bisnis. Fungsi ini sekedar mengeksekusi metode query di repository lalu meneruskan keluar data set `Product`.
-4. **Controller:** Bertugas menerima HTTP Response dari request ke server Fiber. Evaluasi perlakuan *bad request/unauthorized* seperti standard *Expected Response*. Saat lolos, cetak format JSON sesuai key root `"data": [...]`.
-5. **Routes:** Rangkai method handling endpoint `GET /products` agar disalurkan kepada handler di controller tersebut.
-6. **Main Routes:** Input inisialisator route produk yang sebelumnya baru dibentuk, letakkan itu pada registrasi route induk yang letaknya terpusat di direktori konfigurasi routers backend (`routes.go`). 
+```json
+{
+  "error": "bad request"
+}
+```
 
 ---
 
-## Bagian 2: Frontend - Integrasi Data Halaman Home
+## Referensi
 
-Ubah UI di halaman beranda (Home) yang tadinya mengambil hardcode variabel statis agar langsung mengambil dari API response backend.
+Penerapannya mirip seperti fitur **categories** yang sudah dibuat sebelumnya. Tetap gunakan bahasa pemrograman **Golang**, tapi kali ini struktur foldernya sedikit diperbarui agar lebih rapi per-fitur (module-based):
 
-### 1. Integrasi UI Tab Kategori
-- **Target Endpoint:** `GET /api/categories`
-- **Expected Root Data:**
-```json
-{
-    "Categorydata": [
-        {
-            "id": "string",
-            "name": "string",
-            "image": "string",
-            "slug": "string"
-        }
-    ]
-}
-```
-- **Tugas Implementasi:**
-  1. Siapkan service atau function fecthing berbasis AJAX/API call ke alamat host server `/categories`.
-  2. Implementasikan react states dan hooks sejenisnya manakala page load berlangsung di Home untuk mendatangkan set daftar ini.
-  3. Lakukan rendering array dari body `"Categorydata"` sebagai kumpulan dari UI tabs tiap masing-masing nama kategori.
+Instruksi struktur folder di dalam `src/products/`:
+- `routes/` : berisi routing
+- `service/` : berisi logic aplikasi
+- (Gunakan juga sub-folder `model/`, `repository/`, dan `controller/` di bawah `src/products/` agar sesuai pola arsitektur layer).
 
-### 2. Integrasi UI Kumpulan Card Produk
-- **Target Endpoint:** `GET /api/products`
-- **Expected Root Data:**
-```json
-{
-    "data": [
-        {
-            "id": "string",
-            "categories_id": "string",
-            "name": "string",
-            "image": "string",
-            "slug": "string",
-            "price": 10000,
-            "stock_amount": 50
-        }
-    ]
-}
-```
-- **Tugas Implementasi:**
-  1. Set up logic fetching baru menuju URL endpoint `/products`.
-  2. Eksekusi pemanggilan state-filling, bersamaan dan selaras dari logika tabs kategori apabila ada fungsionalitas filtering.
-  3. Lakukan mapping visual komponen per-Card menurut baris yang dipunya oleh object array key `"data"`.
+Format penamaan file:
+- File dalam folder menggunakan format `products-<layer>.go`.
+*(Catatan revisi: Instruksi asli menyebutkan ekstensi `.ts`, namun karena aplikasi backend menggunakan Fiber/Golang, kita menggunakan ekstensi `.go`)*
 
 ---
 
-## Verifikasi Akhir (Checklist)
+## Tahapan Implementasi
 
-- [ ] (Backend) Modul kode Go dirangkai solid dan tidak me-return *Compile Error* kala `go build ./...` dieksekusi.
-- [ ] (Backend) Return dari endpoint URI `/api/products` mengeluarkan expected format JSON sebagaimana pengujian via Postman/cURL.
-- [ ] (Frontend) List di elemen UI kategori pada layer website termapping sesuai isi payload `"Categorydata"`.
-- [ ] (Frontend) Item barang yang termuat dan tampil ke pengguna telah bersumber langsung dari list data array.
+> Ikuti penjelasan tahapan di bawah ini untuk membuat endpoint API Products.
+
+### Tahap 1 — Pembuatan Model (`src/products/model/products-model.go`)
+- Buat struct `Product` yang mencakup seluruh field yang diminta: `id` (string), `categories_id` (string), `name` (string), `image` (string), `slug` (string), `price` (int), dan `stock_amount` (int).
+- Berikan tag GORM dan tag JSON yang sesuai untuk memetakan struct tersebut ke kolom database yang ada. 
+- Tambahkan metod `TableName()` sehingga GORM mengetahui tabel mana yang dituju (sepertinya tabel `products`).
+
+### Tahap 2 — Pembuatan Repository (`src/products/repository/products-repository.go`)
+- Di layer ini, buat satu fungsi khusus yang memiliki tugas melakukan *query* ke database dengan menggunakan koneksi database GORM `config.DB`.
+- Lakukan operasi *find all* terhadap tabel products.
+- Return (kembalikan) hasil query dalam bentuk slice/array dari *struct* `Product`. Pastikan mengembalikan data beserta status error-nya.
+
+### Tahap 3 — Pembuatan Service (`src/products/service/products-service.go`)
+- Layer ini menjadi perantara fungsionalitas alias *logic* aplikasi.
+- Buat sebuah fungsi yang bertugas memanggil fungsi repository yang sudah dibuat di Tahap 2. 
+- Kembalikan data dan error kembali ke atas untuk diterima oleh controller.
+
+### Tahap 4 — Pembuatan Controller (`src/products/controller/products-controller.go`)
+- Di Controller, definisikan fungsi handler yang menerima request dari endpoint (menggunakan context `fiber.Ctx`).
+- Controller bertugas mengambil data dari Service.
+- Lakukan pengecekan error:
+  - Jika terjadi error unauthorized atau bad request, kembalikan JSON struct dengan key `"error"` dengan HTTP status yang tepat (400 atau 401).
+- Jika berhasil (data ditemukan atau pun nilainya array kosong), ubah hasil tersebut menjadi format yang diminta, lalu return menggunakan status `200 OK` di mana *array of products* dibungkus ke dalam JSON object ber-key `"data"`.
+
+### Tahap 5 — Pembuatan Route (`src/products/routes/products-route.go`)
+- Buat fungsi yang menerima objek `fiber.Router`.
+- Gunakan fungsi router ini untuk mendaftarkan path `/products` dengan method HTTP `GET`.
+- Arahkan endpoint ini langsung ke fungsi controller yang baru saja selesai ditulis.
+
+### Tahap 6 — Pendaftaran ke File Routing Utama (`backend/routes/routes.go`)
+- Buka file utama di `backend/routes/routes.go`.
+- Modifikasi file ini untuk melakukan import modul `routes` dari *products* yang telah dibuat.
+- Daftarkan rute produk tersebut ke dalam block route group `/api` yang sudah ada, sehingga ketika aplikasi berjalan, rutenya akan bisa diakses melalui `/api/products`.
+
+---
+
+## Verifikasi
+Setelah diimplementasikan seluruhnya, pastikan menguji endpoint:
+1. Pastikan project ter-build dan bisa berjalan tanpa peringatan (`go build ./...` dan `go run main.go`).
+2. Tembak endpoint `GET /api/products` dengan tools API testing.
+3. Cek kembali format response yang ada apakah semuanya sudah tertampil dan memiliki *field* id, categories_id, name, image, slug, price, dan stock_amount.
+
