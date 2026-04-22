@@ -1,106 +1,91 @@
-# Issue: Implementasi API GET /api/products
+# Perencanaan Integrasi API pada Halaman Home
 
-## Deskripsi
-
-Tambahkan endpoint baru untuk mengambil data list produk dari database.
-
-- **Endpoint:** `GET /api/products`
-- **Method:** GET
+**Tujuan:**
+Menghubungkan elemen antarmuka (UI) pada halaman Home, yaitu bagian Tab Kategori dan list Kartu Produk (Product Cards), agar memakai data dinamis dari REST API yang telah tersedia.
 
 ---
 
-## Expected Response
+## 1. Spesifikasi Format Response API (Kontrak Data)
 
-### Success (200 OK)
+Implementator wajib menyesuaikan proses mapping dan ekstraksi data berdasarkan format *response* yang dikembalikan oleh masing-masing *endpoint*.
 
+**Endpoint: `GET /api/categories`**
+*Response* yang dihasilkan akan memiliki format:
 ```json
 {
-  "data": [
-    {
-      "id": "string",
-      "categories_id": "string",
-      "name": "string",
-      "image": "string",
-      "slug": "string",
-      "price": 10000,
-      "stock_amount": 10
-    }
-  ]
+    "Categorydata": [
+        {
+            "id": "string",
+            "name": "string",
+            "slug": "string"
+        }
+    ]
 }
 ```
 
-### Error responses
-
+**Endpoint: `GET /api/products`**
+*Response* yang dihasilkan akan memiliki format (beserta kaitan relasional ID kategori):
 ```json
 {
-  "error": "unautorized"
+    "Categorydata": [
+        {
+            "id": "string",
+            "categories_id" : "string",
+            "name": "string",
+            "image": "string",
+            "slug": "string",
+            "price" : "int",
+            "stock_amount" : "int"
+        }
+    ]
 }
 ```
-
-```json
-{
-  "error": "bad request"
-}
-```
+*(Perhatikan, array produk berada di dalam object key bernama `Categorydata`, sesuai dengan spesikasi dari backend).*
 
 ---
 
-## Referensi
+## 2. Tahapan Implementasi Langkah-demi-langkah
 
-Penerapannya mirip seperti fitur **categories** yang sudah dibuat sebelumnya. Tetap gunakan bahasa pemrograman **Golang**, tapi kali ini struktur foldernya sedikit diperbarui agar lebih rapi per-fitur (module-based):
+Ikuti instruksi di bawah ini secara runut untuk mengimplementasikan fungsionalitas fetch dan display. Tidak ada tambahan konfigurasi library yang diperlukan, cukup gunakan bawaan framework (seperti `fetch` atau library HTTP client yang sudah ada di *project*).
 
-Instruksi struktur folder di dalam `src/products/`:
-- `routes/` : berisi routing
-- `service/` : berisi logic aplikasi
-- (Gunakan juga sub-folder `model/`, `repository/`, dan `controller/` di bawah `src/products/` agar sesuai pola arsitektur layer).
+### Tahap 1: Persiapan Variabel State (State Management)
+1. Tentukan (*locate*) *file* komponen halaman Home atau *file* komponen khusus yang sedang membungkus Tab dan List Produk.
+2. Buat variabel state penampung utama:
+   - State untuk menyimpan daftar Kategori (nilai awal berupa *array* kosong).
+   - State untuk menyimpan daftar Produk (nilai awal berupa *array* kosong).
+   - State untuk menandai Kategori aktif / tab sedang terpilih (contoh: kategori dengan `id` "Semua" atau `null` sebagai penanda *default*).
+   - State indikator *loading* (boolean).
 
-Format penamaan file:
-- File dalam folder menggunakan format `products-<layer>.go`.
-*(Catatan revisi: Instruksi asli menyebutkan ekstensi `.ts`, namun karena aplikasi backend menggunakan Fiber/Golang, kita menggunakan ekstensi `.go`)*
+### Tahap 2: Fetch Data Kategori & Produk
+1. Buat suatu fungsi asynchronous (misal: `fetchHomeData`).
+2. Tembakkan HTTP GET Request ke '/api/categories'.
+   - Dari hasil kembalian datanya, ambil nilai object `Categorydata`.
+   - Simpan hasil tersebut ke dalam State daftar Kategori.
+3. Di dalam fungsi yang sama atau dengan fungsi yang berbeda (*concurrently*), tembakkan HTTP GET Request ke '/api/products'.
+   - Ambil *array* daftar produk yang terbungkus pada *field key* `Categorydata`.
+   - Simpan nilai array tersebut ke State daftar Produk.
+4. Lakukan pemanggilan fungsi *fetch* ini secara otomatis ketika *component* pertama kali dirender (contoh: di blok inisialisasi / *hook on mount*).
 
----
+### Tahap 3: Menyatukan Data ke UI - Bagian Tab Kategori
+1. Cari *codingan* statis / HTML yang saat ini membentuk menu navigasi kategori (Tabs).
+2. Lakukan iterasi / proses pemetaan (*mapping*) terhadap array state daftar Kategori.
+3. Untuk masing-masing elemen pada array:
+   - Buat elemen Tab HTML yang merender `name` kategori.
+   - Pautkan ID komponen (seperti `key` pada React) menggunakan atribut `id` dari API.
+4. Tambahkan fungsi *OnClick* di tiap tab: Apabila tab tersebut diklik, perbarui / *update* State Kategori aktif dengan `id` kategori spesifik yang diklik oleh user. 
 
-## Tahapan Implementasi
+### Tahap 4: Menyatukan Data ke UI - Bagian Product Cards
+1. Cari komponen UI atau block HTML untuk kartu produk (Product Card).
+2. **Logika Filter (Opsional jika dilakukan di frontend):** Modifikasi array data dari *State daftar Produk*. Buat pengecekan: jika "State Kategori aktif" sedang tidak di *default* "Semua", saring (*filter*) array produk agar yang memiliki `categories_id` sama dengan "State Kategori aktif" saja yang diteruskan.
+3. Lakukan proses *mapping* / iterasi dari hasil array produk (atau produk yang sudah disaring).
+4. Di dalam komponen Card yang diiterasi, masukkan variabel *properties* dari API untuk mengubah UI agar dinamis:
+   - Ganti *Source gambar dummy* menjadi field `image`.
+   - Ganti *Teks Nama* (Judul Produk) menggunakan field `name`.
+   - Ganti *Label Harga* menggunakan indikator angka dari data `price`.
+   - Modifikasi *Status Stok* (Label ketersediaan) yang mengacu ke angka `stock_amount`.
+5. Arahkan *link klik* atau URL navigasi kartu ke halaman detail produk berbekal field unik `slug`.
 
-> Ikuti penjelasan tahapan di bawah ini untuk membuat endpoint API Products.
-
-### Tahap 1 — Pembuatan Model (`src/products/model/products-model.go`)
-- Buat struct `Product` yang mencakup seluruh field yang diminta: `id` (string), `categories_id` (string), `name` (string), `image` (string), `slug` (string), `price` (int), dan `stock_amount` (int).
-- Berikan tag GORM dan tag JSON yang sesuai untuk memetakan struct tersebut ke kolom database yang ada. 
-- Tambahkan metod `TableName()` sehingga GORM mengetahui tabel mana yang dituju (sepertinya tabel `products`).
-
-### Tahap 2 — Pembuatan Repository (`src/products/repository/products-repository.go`)
-- Di layer ini, buat satu fungsi khusus yang memiliki tugas melakukan *query* ke database dengan menggunakan koneksi database GORM `config.DB`.
-- Lakukan operasi *find all* terhadap tabel products.
-- Return (kembalikan) hasil query dalam bentuk slice/array dari *struct* `Product`. Pastikan mengembalikan data beserta status error-nya.
-
-### Tahap 3 — Pembuatan Service (`src/products/service/products-service.go`)
-- Layer ini menjadi perantara fungsionalitas alias *logic* aplikasi.
-- Buat sebuah fungsi yang bertugas memanggil fungsi repository yang sudah dibuat di Tahap 2. 
-- Kembalikan data dan error kembali ke atas untuk diterima oleh controller.
-
-### Tahap 4 — Pembuatan Controller (`src/products/controller/products-controller.go`)
-- Di Controller, definisikan fungsi handler yang menerima request dari endpoint (menggunakan context `fiber.Ctx`).
-- Controller bertugas mengambil data dari Service.
-- Lakukan pengecekan error:
-  - Jika terjadi error unauthorized atau bad request, kembalikan JSON struct dengan key `"error"` dengan HTTP status yang tepat (400 atau 401).
-- Jika berhasil (data ditemukan atau pun nilainya array kosong), ubah hasil tersebut menjadi format yang diminta, lalu return menggunakan status `200 OK` di mana *array of products* dibungkus ke dalam JSON object ber-key `"data"`.
-
-### Tahap 5 — Pembuatan Route (`src/products/routes/products-route.go`)
-- Buat fungsi yang menerima objek `fiber.Router`.
-- Gunakan fungsi router ini untuk mendaftarkan path `/products` dengan method HTTP `GET`.
-- Arahkan endpoint ini langsung ke fungsi controller yang baru saja selesai ditulis.
-
-### Tahap 6 — Pendaftaran ke File Routing Utama (`backend/routes/routes.go`)
-- Buka file utama di `backend/routes/routes.go`.
-- Modifikasi file ini untuk melakukan import modul `routes` dari *products* yang telah dibuat.
-- Daftarkan rute produk tersebut ke dalam block route group `/api` yang sudah ada, sehingga ketika aplikasi berjalan, rutenya akan bisa diakses melalui `/api/products`.
-
----
-
-## Verifikasi
-Setelah diimplementasikan seluruhnya, pastikan menguji endpoint:
-1. Pastikan project ter-build dan bisa berjalan tanpa peringatan (`go build ./...` dan `go run main.go`).
-2. Tembak endpoint `GET /api/products` dengan tools API testing.
-3. Cek kembali format response yang ada apakah semuanya sudah tertampil dan memiliki *field* id, categories_id, name, image, slug, price, dan stock_amount.
-
+### Tahap 5: Pengujian (Testing & Verifikasi)
+1. **Reload halaman Home**: Periksa bahwa Tab kategori memunculkan nama-nama dinamis hasil API (Bukan data dari layout *dummy*/statis).
+2. **Render Awal**: Pastikan produk yang muncul di baris bawah / penampang grid memiliki gambar, nama, dan harga yang pas mengacu kepada apa yang didapatkan komponen fetch API produk.
+3. **Behavior Klik Tab**: Cobalah mengklik salah satu Tab Kategori. Pastikan sistem dapat me-render ulang UI dan daftar kartu Produk langsung terfilter, memunculkan kartu hanya untuk produk-produk yang sesuai dengan tipe / `categories_id` kategori tersebut.
