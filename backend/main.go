@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"marketplace-backend/config"
-	"marketplace-backend/routes"
+	"marketplace-backend/src/routes"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
