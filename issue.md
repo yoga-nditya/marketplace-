@@ -185,11 +185,11 @@ Setelah semua tahap selesai, lakukan langkah berikut untuk memastikan implementa
 
 ## Checklist
 
-- [ ] `backend/src/model/category-model.go` — dibuat
-- [ ] `backend/src/repository/category-repository.go` — dibuat
-- [ ] `backend/src/service/category-service.go` — dibuat
-- [ ] `backend/src/controller/category-controller.go` — dibuat
-- [ ] `backend/src/routes/category-route.go` — dibuat
-- [ ] `backend/routes/routes.go` — dimodifikasi
-- [ ] `go build ./...` — tidak ada error
-- [ ] `GET /api/categories` — response sesuai format
+- [x] `backend/src/model/category-model.go` — dibuat
+- [x] `backend/src/repository/category-repository.go` — dibuat
+- [x] `backend/src/service/category-service.go` — dibuat
+- [x] `backend/src/controller/category-controller.go` — dibuat
+- [x] `backend/src/routes/category-route.go` — dibuat
+- [x] `backend/routes/routes.go` — dimodifikasi
+- [x] `go build ./...` — tidak ada error
+- [x] `GET /api/categories` — response sesuai format
