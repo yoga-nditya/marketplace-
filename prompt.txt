@@ -58,7 +58,6 @@ dimana response nya adalah :
         {
             "id": "string",
             "name": "string",
-            "image": "string",
             "slug": "string"
         },
     ]
@@ -72,9 +71,12 @@ dimana response nya adalah :
     "Categorydata": [
         {
             "id": "string",
+            "categories_id" : "string",
             "name": "string",
             "image": "string",
             "slug": "string"
+            "price" : "int"
+            "stock_amount" : "int"
         },
     ]
 }
