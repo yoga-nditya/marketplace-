@@ -75,41 +75,41 @@ export default function Banner() {
   };
 
   return (
-    <div className="relative w-full mb-8 group">
+    <div className="relative w-full mb-10 group">
       {/* Banner Image Display */}
-      <div className="w-full h-[250px] rounded-xl overflow-hidden shadow-sm relative">
+      <div className="w-full h-[280px] md:h-[350px] rounded-2xl overflow-hidden shadow-md relative">
         <img
           src={getImageUrl(banners[currentSlide].image)}
           alt={banners[currentSlide].title}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+          className="w-full h-full object-cover"
         />
       </div>
 
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 active:scale-90"
+        className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:bg-black/40 transition-all opacity-0 group-hover:opacity-100 active:scale-95 border border-white/20"
         aria-label="Previous slide"
       >
-        <ChevronLeft size={24} className="text-gray-700" />
+        <ChevronLeft size={28} className="text-white" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 active:scale-90"
+        className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:bg-black/40 transition-all opacity-0 group-hover:opacity-100 active:scale-95 border border-white/20"
         aria-label="Next slide"
       >
-        <ChevronRight size={24} className="text-gray-700" />
+        <ChevronRight size={28} className="text-white" />
       </button>
 
       {/* Dots Indicator */}
-      <div className="flex justify-center gap-2 mt-4">
+      <div className="flex justify-center gap-2.5 mt-5">
         {banners.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentSlide
-              ? "bg-purple-600 w-6"
-              : "bg-gray-300 hover:bg-gray-400"
+            className={`transition-all duration-300 rounded-full ${index === currentSlide
+              ? "bg-gray-800 w-8 h-2"
+              : "bg-gray-300 w-2 h-2 hover:bg-gray-400"
               }`}
             aria-label={`Go to slide ${index + 1}`}
           />

@@ -38,7 +38,6 @@ export default function HomeClient() {
     loadData();
   }, []);
 
-  // Filter products based on category and search query
   const filteredProducts = useMemo(() => {
     const activeCategory = categories.find((c) => c.id === activeCategoryId);
     let filtered = activeCategory
@@ -55,12 +54,9 @@ export default function HomeClient() {
     return filtered;
   }, [products, categories, activeCategoryId, searchQuery]);
 
-  // Handle page resets when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [activeCategoryId, searchQuery]);
-
-  // Pagination calculations
   const totalResults = filteredProducts.length;
   const totalPages = Math.ceil(totalResults / ITEMS_PER_PAGE);
   const displayedProducts = useMemo(() => {
@@ -70,23 +66,23 @@ export default function HomeClient() {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Container widened for better page coverage */}
-      <div className="max-w-[1100px] mx-auto px-6 py-8">
+      {/* Reduced top padding since Navbar is now present */}
+      <div className="max-w-[1280px] mx-auto px-6 py-4">
         <Banner />
-        <CategoryTabs 
-          categories={categories} 
-          activeCategoryId={activeCategoryId} 
-          onCategoryChange={setActiveCategoryId} 
+        <CategoryTabs
+          categories={categories}
+          activeCategoryId={activeCategoryId}
+          onCategoryChange={setActiveCategoryId}
         />
-        <ProductGrid 
-          products={displayedProducts} 
+        <ProductGrid
+          products={displayedProducts}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          isLoading={isLoading} 
+          isLoading={isLoading}
           isFiltered={!!(activeCategoryId || searchQuery.trim())}
         />
         {!isLoading && totalPages > 0 && (
-          <Pagination 
+          <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             totalResults={totalResults}
