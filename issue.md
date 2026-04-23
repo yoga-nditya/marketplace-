@@ -1,91 +1,122 @@
-# Perencanaan Integrasi API pada Halaman Home
+# Perencanaan Implementasi API Register dan Login
 
 **Tujuan:**
-Menghubungkan elemen antarmuka (UI) pada halaman Home, yaitu bagian Tab Kategori dan list Kartu Produk (Product Cards), agar memakai data dinamis dari REST API yang telah tersedia.
+Dokumen ini berisi panduan teknis langkah demi langkah untuk mengimplementasikan fitur autentikasi (Register dan Login) pada backend.
+---
+
+## 1. Struktur Folder dan File
+Meskipun fitur ini terkait autentikasi, ikuti pola struktur dan pemisahan *logic* yang sudah ada sebelumnya (seperti pada modul `categories`). 
+Buat direktori dan file untuk modul autentikasi (bisa ditempatkan di `src/auth` atau sesuai dengan standar penamaan seperti arahan awal `src/products`):
+
+- **Folder `routes`**: Berisi file routing untuk menangani definisi *endpoint* API.
+  - *Contoh format penamaan*: `auth-route.ts` / `auth-route.go` (sesuaikan dengan bahasa backend yang digunakan).
+- **Folder `service`**: Berisi file untuk menangani *business logic* aplikasi.
+  - *Contoh format penamaan*: `auth-service.ts` / `auth-service.go`.
+
+*Catatan: Penerapannya harus mirip dan konsisten dengan gaya penulisan kode pada fitur `categories` yang sudah berjalan saat ini.*
 
 ---
 
-## 1. Spesifikasi Format Response API (Kontrak Data)
+## 2. Implementasi Endpoint API
 
-Implementator wajib menyesuaikan proses mapping dan ekstraksi data berdasarkan format *response* yang dikembalikan oleh masing-masing *endpoint*.
+### A. Endpoint POST `/api/register`
+**Fungsi**: Mendaftarkan pengguna baru ke dalam sistem.
 
-**Endpoint: `GET /api/categories`**
-*Response* yang dihasilkan akan memiliki format:
+**Tahapan Pengerjaan Service & Route:**
+1. Tambahkan *route* baru `POST /api/register` di dalam file `routes`.
+2. Arahkan *route* tersebut ke fungsi di dalam `service` yang menangani logika register.
+3. Terima *request body* JSON yang berisi data pendaftaran user (`userName`, `email`, `password`, `confirmPassword`).
+4. Lakukan validasi data input:
+   - Pastikan format email valid.
+   - Pastikan nilai `password` dan `confirmPassword` sama (cocok).
+   - Lakukan pengecekan ke database untuk memastikan email belum terdaftar.
+5. Jika validasi gagal (email sudah ada, password tidak cocok, format salah, dsb.), kembalikan response *error*.
+6. Jika data valid, lakukan *hashing* pada password sebelum disimpan (jangan pernah menyimpan password dalam bentuk *plain text*).
+7. Simpan data user ke dalam database. Pastikan respons mengeluarkan seluruh *field* dari database untuk user tersebut.
+8. Kembalikan response sukses dengan **HTTP Status 201**.
+
+**Format Request (Input):**
 ```json
 {
-    "Categorydata": [
-        {
-            "id": "string",
-            "name": "string",
-            "slug": "string"
-        }
-    ]
+    "userName": "string",
+    "email": "string",
+    "password": "string",
+    "confirmPassword": "string"
 }
 ```
 
-**Endpoint: `GET /api/products`**
-*Response* yang dihasilkan akan memiliki format (beserta kaitan relasional ID kategori):
+**Format Response Berhasil (HTTP Status 201):**
 ```json
 {
-    "Categorydata": [
-        {
-            "id": "string",
-            "categories_id" : "string",
-            "name": "string",
-            "image": "string",
-            "slug": "string",
-            "price" : "int",
-            "stock_amount" : "int"
-        }
-    ]
+    "success": true,
+    "message": "Register berhasil",
+    "data": {
+        "id": "string",
+        "name": "string",
+        "email": "string",
+        "role": "string"
+    }
 }
 ```
-*(Perhatikan, array produk berada di dalam object key bernama `Categorydata`, sesuai dengan spesikasi dari backend).*
+*(Catatan: Field di dalam "data" harus menyesuaikan dengan skema database yang sebenarnya, keluarkan semua field yang relevan sesuai instruksi).*
+
+**Format Response Gagal (Error):**
+```json
+{
+    "success": false,
+    "message": "error(bisa email sudah ada atau password tidak cocok atau error bad request atau internal server error)"
+}
+```
 
 ---
 
-## 2. Tahapan Implementasi Langkah-demi-langkah
+### B. Endpoint POST `/api/login`
+**Fungsi**: Autentikasi pengguna untuk masuk ke dalam sistem.
 
-Ikuti instruksi di bawah ini secara runut untuk mengimplementasikan fungsionalitas fetch dan display. Tidak ada tambahan konfigurasi library yang diperlukan, cukup gunakan bawaan framework (seperti `fetch` atau library HTTP client yang sudah ada di *project*).
+**Tahapan Pengerjaan Service & Route:**
+1. Tambahkan *route* baru `POST /api/login` di dalam file `routes`.
+2. Arahkan *route* tersebut ke fungsi di dalam `service` yang menangani logika login.
+3. Terima *request body* JSON yang berisi kredensial login (`email` dan `password`).
+4. Lakukan *query* ke database untuk mencari data user berdasarkan email yang diberikan.
+5. Jika user tidak ditemukan, kembalikan response *error*.
+6. Jika user ditemukan, lakukan verifikasi password dengan mencocokkan *password* dari *request* dengan *hash password* yang ada di database.
+7. Jika password salah/tidak cocok, kembalikan response *error*.
+8. Jika verifikasi password berhasil, *generate* token autentikasi (seperti JWT).
+9. Kembalikan response sukses yang berisi data token autentikasi.
 
-### Tahap 1: Persiapan Variabel State (State Management)
-1. Tentukan (*locate*) *file* komponen halaman Home atau *file* komponen khusus yang sedang membungkus Tab dan List Produk.
-2. Buat variabel state penampung utama:
-   - State untuk menyimpan daftar Kategori (nilai awal berupa *array* kosong).
-   - State untuk menyimpan daftar Produk (nilai awal berupa *array* kosong).
-   - State untuk menandai Kategori aktif / tab sedang terpilih (contoh: kategori dengan `id` "Semua" atau `null` sebagai penanda *default*).
-   - State indikator *loading* (boolean).
+**Format Request (Input):**
+```json
+{
+    "email": "string",
+    "password": "string"
+}
+```
 
-### Tahap 2: Fetch Data Kategori & Produk
-1. Buat suatu fungsi asynchronous (misal: `fetchHomeData`).
-2. Tembakkan HTTP GET Request ke '/api/categories'.
-   - Dari hasil kembalian datanya, ambil nilai object `Categorydata`.
-   - Simpan hasil tersebut ke dalam State daftar Kategori.
-3. Di dalam fungsi yang sama atau dengan fungsi yang berbeda (*concurrently*), tembakkan HTTP GET Request ke '/api/products'.
-   - Ambil *array* daftar produk yang terbungkus pada *field key* `Categorydata`.
-   - Simpan nilai array tersebut ke State daftar Produk.
-4. Lakukan pemanggilan fungsi *fetch* ini secara otomatis ketika *component* pertama kali dirender (contoh: di blok inisialisasi / *hook on mount*).
+**Format Response Berhasil (Success):**
+```json
+{
+    "success": true,
+    "message": "Login berhasil",
+    "data": {
+        "access_token": "",
+        "token_type": "",
+        "expires_in": 0,
+        ".issued": "",
+        ".expires": ""
+    }
+}
+```
 
-### Tahap 3: Menyatukan Data ke UI - Bagian Tab Kategori
-1. Cari *codingan* statis / HTML yang saat ini membentuk menu navigasi kategori (Tabs).
-2. Lakukan iterasi / proses pemetaan (*mapping*) terhadap array state daftar Kategori.
-3. Untuk masing-masing elemen pada array:
-   - Buat elemen Tab HTML yang merender `name` kategori.
-   - Pautkan ID komponen (seperti `key` pada React) menggunakan atribut `id` dari API.
-4. Tambahkan fungsi *OnClick* di tiap tab: Apabila tab tersebut diklik, perbarui / *update* State Kategori aktif dengan `id` kategori spesifik yang diklik oleh user. 
+**Format Response Gagal (Error):**
+```json
+{
+    "success": false,
+    "message": "error(bisa email salah , password salah , user tidak ditemukan atau error bad request atau internal server error)"
+}
+```
 
-### Tahap 4: Menyatukan Data ke UI - Bagian Product Cards
-1. Cari komponen UI atau block HTML untuk kartu produk (Product Card).
-2. **Logika Filter (Opsional jika dilakukan di frontend):** Modifikasi array data dari *State daftar Produk*. Buat pengecekan: jika "State Kategori aktif" sedang tidak di *default* "Semua", saring (*filter*) array produk agar yang memiliki `categories_id` sama dengan "State Kategori aktif" saja yang diteruskan.
-3. Lakukan proses *mapping* / iterasi dari hasil array produk (atau produk yang sudah disaring).
-4. Di dalam komponen Card yang diiterasi, masukkan variabel *properties* dari API untuk mengubah UI agar dinamis:
-   - Ganti *Source gambar dummy* menjadi field `image`.
-   - Ganti *Teks Nama* (Judul Produk) menggunakan field `name`.
-   - Ganti *Label Harga* menggunakan indikator angka dari data `price`.
-   - Modifikasi *Status Stok* (Label ketersediaan) yang mengacu ke angka `stock_amount`.
-5. Arahkan *link klik* atau URL navigasi kartu ke halaman detail produk berbekal field unik `slug`.
+---
 
-### Tahap 5: Pengujian (Testing & Verifikasi)
-1. **Reload halaman Home**: Periksa bahwa Tab kategori memunculkan nama-nama dinamis hasil API (Bukan data dari layout *dummy*/statis).
-2. **Render Awal**: Pastikan produk yang muncul di baris bawah / penampang grid memiliki gambar, nama, dan harga yang pas mengacu kepada apa yang didapatkan komponen fetch API produk.
-3. **Behavior Klik Tab**: Cobalah mengklik salah satu Tab Kategori. Pastikan sistem dapat me-render ulang UI dan daftar kartu Produk langsung terfilter, memunculkan kartu hanya untuk produk-produk yang sesuai dengan tipe / `categories_id` kategori tersebut.
+## 3. Catatan Penting Tambahan
+- **Field Data Menyesuaikan Database:** Pastikan data yang dikembalikan pada blok `data` pada response Register benar-benar mengeluarkan **semua field** yang ada sesuai dengan skema tabel user di database (sesuai referensi gambar).
+- **Error Handling:** Seluruh penanganan *error* (seperti *bad request*, email tidak ditemukan, maupun *internal server error*) harus ditangkap dan menggunakan format *response error* standar seperti di atas dengan `success: false`.
