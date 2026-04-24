@@ -45,3 +45,19 @@ type LoginResponse struct {
 	Expires     string `json:".expires"`
 	Name        string `json:"name"`
 }
+
+type UserToken struct {
+	ID          uint      `gorm:"primaryKey;autoIncrement"`
+	UserID      string    `gorm:"type:char(36);column:user_id"`
+	AccessToken string    `gorm:"type:text;column:access_token"`
+	TokenType   string    `gorm:"type:varchar(50);default:Bearer;column:token_type"`
+	ExpiresIn   int       `gorm:"column:expires_in"`
+	IssuedAt    time.Time `gorm:"column:issued_at"`
+	ExpiresAt   time.Time `gorm:"column:expires_at"`
+	CreatedAt   time.Time `gorm:"column:created_at"`
+	UpdatedAt   time.Time `gorm:"column:updated_at"`
+}
+
+func (UserToken) TableName() string {
+	return "user_tokens"
+}

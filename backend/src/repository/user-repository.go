@@ -14,3 +14,7 @@ func GetUserByEmail(email string) (model.User, error) {
 func CreateUser(user *model.User) error {
 	return config.DB.Create(user).Error
 }
+
+func CreateUserToken(token *model.UserToken) error {
+	return config.DB.Create(token).Error
+}

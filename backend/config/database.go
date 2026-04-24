@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 
+	"marketplace-backend/src/model"
+
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -33,6 +35,9 @@ func ConnectDB() {
 	} else {
 		log.Println("Successfully connected to the database")
 	}
+
+	// Auto Migration
+	db.AutoMigrate(&model.User{}, &model.UserToken{})
 
 	DB = db
 }

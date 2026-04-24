@@ -75,13 +75,28 @@ func Login(req model.LoginRequest) (model.LoginResponse, error) {
 	expiresAt := now.Add(time.Duration(expiresIn) * time.Second)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":  user.ID,
-		"exp":  expiresAt.Unix(),
+		"sub":   user.ID,
+		"exp":   expiresAt.Unix(),
 		"roles": user.Roles,
 	})
 
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
+		return model.LoginResponse{}, err
+	}
+
+	userToken := model.UserToken{
+		UserID:      user.ID,
+		AccessToken: tokenString,
+		TokenType:   "Bearer",
+		ExpiresIn:   int(expiresIn),
+		IssuedAt:    now,
+		ExpiresAt:   expiresAt,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
+
+	if err := repository.CreateUserToken(&userToken); err != nil {
 		return model.LoginResponse{}, err
 	}
 
