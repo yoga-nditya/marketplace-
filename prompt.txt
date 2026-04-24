@@ -84,39 +84,67 @@ dan tidak perlu penjelasan dengan kode hanya detail apa saja yang harus dilakuka
 
 isi dari planing nya adalah sebagai berikut : 
 
-buatkan agar halaman home yang ada tabs categories fetch ke api/categories yang sudah ada
-dimana response nya adalah :
+buatkan agar halaman login dan register yang ada bisa login dan register menggunakan api/login dan api/register yang sudah ada
+
+- untuk login request body nya adalah :
 
 {
-    "Categorydata": [
-        {
-            "id": "string",
-            "name": "string",
-            "slug": "string"
-        },
-    ]
+    "email": "string",
+    "password": "string"
 }
 
-dan untuk card nya fetch ke api/products 
-
-dimana response nya adalah :
+- dimana response login nya adalah :
 
 {
-    "Categorydata": [
-        {
-            "id": "string",
-            "categories_id" : "string",
-            "name": "string",
-            "image": "string",
-            "slug": "string"
-            "price" : "int"
-            "stock_amount" : "int"
-        },
-    ]
+    "success": true,
+    "message": "Login berhasil",
+    "data": {
+        "access_token": "string",
+        "token_type": "string",
+        "expires_in": int,
+        ".issued": "string",
+        ".expires": "string"
+    }
 }
+
+response body login (error) :
+{
+    "success": false,
+    "message": "error(bisa email salah , password salah , user tidak ditemukan atau error bad request atau internal server error)"
+}
+
+- untuk register request body nya adalah :
+{
+    "userName": "string",
+    "email": "string",
+    "password": "string",
+    "confirmPassword": "string"
+}
+
+response body register (succsess) :
+{
+    http status 201; 
+    "success": true,
+    "message": "Register berhasil",
+    "data": {
+        "id": "string",
+        "name": "string",
+        "email": "string"
+        "role": "string"
+    }
+}
+
+response body register (error) :
+{
+    "success": false,
+    "message": "error(bisa email sudah ada atau password tidak cocok atau error bad request atau internal server error)"
+}
+
 
 jelaskan tahapan2 yang harus dilakukan untuk implementasi fitur ini anggap nanti yang mengimplementasikan adalah junior programmer atau mode ai yang lebih murah
 dan tidak perlu penjelasan dengan kode hanya detail apa saja yang harus dilakukan 
+
+
 
 - buatkan issue.md yang berisi perencanaan untuk nanti di implementasikan untuk junior programmer atau model ai yang  lebih murah
 
