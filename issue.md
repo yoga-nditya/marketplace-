@@ -1,41 +1,48 @@
-# Perencanaan Implementasi API Register dan Login
+# Issue: Implementasi Fitur Login dan Register
 
-**Tujuan:**
-Dokumen ini berisi panduan teknis langkah demi langkah untuk mengimplementasikan fitur autentikasi (Register dan Login) pada backend.
+## Deskripsi
+Tugas ini adalah menghubungkan halaman Login dan Register yang sudah ada di frontend dengan API backend (`api/login` dan `api/register`).
+
+## Spesifikasi API
+
+### 1. Endpoint Login (`POST /api/login`)
+
+**Request Body:**
+```json
+{
+    "email": "string",
+    "password": "string"
+}
+```
+
+**Response Success:**
+```json
+{
+    "success": true,
+    "message": "Login berhasil",
+    "data": {
+        "access_token": "string",
+        "token_type": "string",
+        "expires_in": 3600,
+        ".issued": "string",
+        ".expires": "string"
+    }
+}
+```
+
+**Response Error:**
+```json
+{
+    "success": false,
+    "message": "error(bisa email salah, password salah, user tidak ditemukan atau error bad request atau internal server error)"
+}
+```
+
 ---
 
-## 1. Struktur Folder dan File
-Meskipun fitur ini terkait autentikasi, ikuti pola struktur dan pemisahan *logic* yang sudah ada sebelumnya (seperti pada modul `categories`). 
-Buat direktori dan file untuk modul autentikasi (bisa ditempatkan di `src/auth` atau sesuai dengan standar penamaan seperti arahan awal `src/products`):
+### 2. Endpoint Register (`POST /api/register`)
 
-- **Folder `routes`**: Berisi file routing untuk menangani definisi *endpoint* API.
-  - *Contoh format penamaan*: `auth-route.ts` / `auth-route.go` (sesuaikan dengan bahasa backend yang digunakan).
-- **Folder `service`**: Berisi file untuk menangani *business logic* aplikasi.
-  - *Contoh format penamaan*: `auth-service.ts` / `auth-service.go`.
-
-*Catatan: Penerapannya harus mirip dan konsisten dengan gaya penulisan kode pada fitur `categories` yang sudah berjalan saat ini.*
-
----
-
-## 2. Implementasi Endpoint API
-
-### A. Endpoint POST `/api/register`
-**Fungsi**: Mendaftarkan pengguna baru ke dalam sistem.
-
-**Tahapan Pengerjaan Service & Route:**
-1. Tambahkan *route* baru `POST /api/register` di dalam file `routes`.
-2. Arahkan *route* tersebut ke fungsi di dalam `service` yang menangani logika register.
-3. Terima *request body* JSON yang berisi data pendaftaran user (`userName`, `email`, `password`, `confirmPassword`).
-4. Lakukan validasi data input:
-   - Pastikan format email valid.
-   - Pastikan nilai `password` dan `confirmPassword` sama (cocok).
-   - Lakukan pengecekan ke database untuk memastikan email belum terdaftar.
-5. Jika validasi gagal (email sudah ada, password tidak cocok, format salah, dsb.), kembalikan response *error*.
-6. Jika data valid, lakukan *hashing* pada password sebelum disimpan (jangan pernah menyimpan password dalam bentuk *plain text*).
-7. Simpan data user ke dalam database. Pastikan respons mengeluarkan seluruh *field* dari database untuk user tersebut.
-8. Kembalikan response sukses dengan **HTTP Status 201**.
-
-**Format Request (Input):**
+**Request Body:**
 ```json
 {
     "userName": "string",
@@ -45,7 +52,7 @@ Buat direktori dan file untuk modul autentikasi (bisa ditempatkan di `src/auth` 
 }
 ```
 
-**Format Response Berhasil (HTTP Status 201):**
+**Response Success (HTTP Status 201):**
 ```json
 {
     "success": true,
@@ -58,9 +65,8 @@ Buat direktori dan file untuk modul autentikasi (bisa ditempatkan di `src/auth` 
     }
 }
 ```
-*(Catatan: Field di dalam "data" harus menyesuaikan dengan skema database yang sebenarnya, keluarkan semua field yang relevan sesuai instruksi).*
 
-**Format Response Gagal (Error):**
+**Response Error:**
 ```json
 {
     "success": false,
@@ -70,53 +76,43 @@ Buat direktori dan file untuk modul autentikasi (bisa ditempatkan di `src/auth` 
 
 ---
 
-### B. Endpoint POST `/api/login`
-**Fungsi**: Autentikasi pengguna untuk masuk ke dalam sistem.
+## Tahapan Implementasi
 
-**Tahapan Pengerjaan Service & Route:**
-1. Tambahkan *route* baru `POST /api/login` di dalam file `routes`.
-2. Arahkan *route* tersebut ke fungsi di dalam `service` yang menangani logika login.
-3. Terima *request body* JSON yang berisi kredensial login (`email` dan `password`).
-4. Lakukan *query* ke database untuk mencari data user berdasarkan email yang diberikan.
-5. Jika user tidak ditemukan, kembalikan response *error*.
-6. Jika user ditemukan, lakukan verifikasi password dengan mencocokkan *password* dari *request* dengan *hash password* yang ada di database.
-7. Jika password salah/tidak cocok, kembalikan response *error*.
-8. Jika verifikasi password berhasil, *generate* token autentikasi (seperti JWT).
-9. Kembalikan response sukses yang berisi data token autentikasi.
+Berikut adalah langkah-langkah detail yang harus dilakukan untuk menyelesaikan task ini. Tidak perlu menuliskan kode, cukup ikuti instruksi alur berikut:
 
-**Format Request (Input):**
-```json
-{
-    "email": "string",
-    "password": "string"
-}
-```
+1. **Setup State Management pada Form:**
+   - **Login:** Buat state/variabel untuk menampung nilai input `email` dan `password`. Hubungkan state ini dengan field input di form login.
+   - **Register:** Buat state/variabel untuk menampung nilai input `userName`, `email`, `password`, dan `confirmPassword`. Hubungkan state ini dengan field input di form register.
 
-**Format Response Berhasil (Success):**
-```json
-{
-    "success": true,
-    "message": "Login berhasil",
-    "data": {
-        "access_token": "",
-        "token_type": "",
-        "expires_in": 0,
-        ".issued": "",
-        ".expires": ""
-    }
-}
-```
+2. **Implementasi Validasi Form (Frontend):**
+   - Sebelum data dikirim ke API, buat validasi sederhana untuk memastikan semua field yang wajib sudah terisi.
+   - Khusus untuk form Register, pastikan nilai `password` dan `confirmPassword` sama persis. Tampilkan pesan error di UI jika tidak sama dan cegah form dikirim.
 
-**Format Response Gagal (Error):**
-```json
-{
-    "success": false,
-    "message": "error(bisa email salah , password salah , user tidak ditemukan atau error bad request atau internal server error)"
-}
-```
+3. **Pembuatan Fungsi Pemanggilan API:**
+   - Buat fungsi asinkronus untuk mengirimkan *HTTP POST request* ke endpoint `/api/login` dengan membawa *payload* berupa object request body login.
+   - Buat fungsi asinkronus untuk mengirimkan *HTTP POST request* ke endpoint `/api/register` dengan membawa *payload* berupa object request body register.
+   - Pastikan *request headers* diset untuk menerima dan mengirim format JSON (misalnya `Content-Type: application/json`).
 
----
+4. **Penanganan Submit Form Login:**
+   - Pada event `onSubmit` di form login, cegah perilaku default *refresh* halaman dan panggil fungsi API Login.
+   - **Jika berhasil (`success: true`):**
+     - Ekstrak `access_token` dari dalam response `data`.
+     - Simpan token tersebut ke media penyimpanan browser (misalnya `localStorage`, `sessionStorage`, atau `cookies` sesuai konvensi project).
+     - Tampilkan notifikasi (misal menggunakan toast atau alert) dengan pesan keberhasilan kepada user.
+     - *Redirect* (arahkan) user pindah ke halaman utama/dashboard secara otomatis.
+   - **Jika gagal (`success: false` atau error jaringan):**
+     - Tangkap pesan error (dari `response.message`).
+     - Tampilkan pesan error tersebut di UI agar user tahu mengapa login gagal (misal: "email/password salah").
 
-## 3. Catatan Penting Tambahan
-- **Field Data Menyesuaikan Database:** Pastikan data yang dikembalikan pada blok `data` pada response Register benar-benar mengeluarkan **semua field** yang ada sesuai dengan skema tabel user di database (sesuai referensi gambar).
-- **Error Handling:** Seluruh penanganan *error* (seperti *bad request*, email tidak ditemukan, maupun *internal server error*) harus ditangkap dan menggunakan format *response error* standar seperti di atas dengan `success: false`.
+5. **Penanganan Submit Form Register:**
+   - Pada event `onSubmit` di form register, cegah perilaku default *refresh* halaman dan panggil fungsi API Register.
+   - **Jika berhasil (Status HTTP 201 dan `success: true`):**
+     - Tampilkan notifikasi sukses kepada user bahwa registrasi telah berhasil dilakukan.
+     - Kosongkan isi form dan *redirect* user ke halaman Login agar mereka bisa mencoba masuk dengan akun yang baru saja dibuat.
+   - **Jika gagal (`success: false` atau error jaringan):**
+     - Tangkap pesan error dari response (misalnya "email sudah terdaftar").
+     - Tampilkan pesan error tersebut di bagian form yang sesuai agar user dapat memperbaikinya.
+
+6. **Penanganan Indikator Loading (Opsional tapi Direkomendasikan):**
+   - Tambahkan state indikator loading yang bernilai `true` sesaat sebelum API dipanggil, dan `false` saat API selesai memberikan response (baik sukses maupun error).
+   - Gunakan indikator ini untuk menonaktifkan (*disable*) tombol submit dan menampilkan animasi loading, guna mencegah user menekan tombol berkali-kali saat proses sedang berlangsung.
