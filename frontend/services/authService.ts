@@ -16,6 +16,7 @@ export interface LoginResponse {
     expires_in: number;
     ".issued": string;
     ".expires": string;
+    name: string;
   };
 }
 

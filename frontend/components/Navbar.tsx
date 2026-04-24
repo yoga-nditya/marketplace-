@@ -1,22 +1,37 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, User, LogOut } from "lucide-react";
+import { ShoppingCart, User, LogOut, ChevronDown, ClipboardList } from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function Navbar() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Check if token exists in localStorage
     const token = localStorage.getItem("access_token");
+    const name = localStorage.getItem("user_name");
     setIsLoggedIn(!!token);
+    if (name) setUserName(name);
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = () => {
+    setIsDropdownOpen(false);
     Swal.fire({
       title: "Logout?",
       text: "Anda akan keluar dari akun ini.",
@@ -30,6 +45,7 @@ export default function Navbar() {
       if (result.isConfirmed) {
         localStorage.removeItem("access_token");
         localStorage.removeItem("token_type");
+        localStorage.removeItem("user_name");
         setIsLoggedIn(false);
         Swal.fire({
           icon: "success",
@@ -77,23 +93,44 @@ export default function Navbar() {
 
           <div className="flex items-center gap-6 ml-4">
             {isLoggedIn ? (
-              <div className="flex items-center gap-4">
-                <Link 
-                  href="/profile" 
-                  className="flex items-center gap-2 text-[#555555] hover:text-[#4338CA] transition-colors font-medium"
-                >
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-[#4338CA]" />
-                  </div>
-                  Profile
-                </Link>
+              <div className="relative" ref={dropdownRef}>
                 <button 
-                  onClick={handleLogout}
-                  className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
-                  title="Logout"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2 text-[#1A1A1A] hover:text-[#4338CA] transition-colors font-semibold"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <span>Hello, {userName || "User"}</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-3 w-56 bg-white border border-gray-100 rounded-lg shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <Link 
+                      href="/profile" 
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-[#4338CA] transition-colors"
+                    >
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">Edit Profil</span>
+                    </Link>
+                    <Link 
+                      href="/orders" 
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-[#4338CA] transition-colors"
+                    >
+                      <ClipboardList className="w-5 h-5" />
+                      <span className="font-medium">Riwayat Pesanan</span>
+                    </Link>
+                    <div className="h-[1px] bg-gray-100 my-1"></div>
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span className="font-medium">Logout</span>
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-4 text-[#555555] font-medium">

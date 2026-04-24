@@ -43,4 +43,5 @@ type LoginResponse struct {
 	ExpiresIn   int64  `json:"expires_in"`
 	Issued      string `json:".issued"`
 	Expires     string `json:".expires"`
+	Name        string `json:"name"`
 }

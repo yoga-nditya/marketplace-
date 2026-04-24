@@ -91,5 +91,6 @@ func Login(req model.LoginRequest) (model.LoginResponse, error) {
 		ExpiresIn:   expiresIn,
 		Issued:      now.Format(time.RFC3339),
 		Expires:     expiresAt.Format(time.RFC3339),
+		Name:        user.Name,
 	}, nil
 }

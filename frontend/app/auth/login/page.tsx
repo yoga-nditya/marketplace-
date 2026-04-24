@@ -38,9 +38,10 @@ export default function LoginPage() {
           timer: 1500,
         });
 
-        // Simpan token ke localStorage
+        // Simpan token dan info user ke localStorage
         localStorage.setItem("access_token", response.Userdata.access_token);
         localStorage.setItem("token_type", response.Userdata.token_type);
+        localStorage.setItem("user_name", response.Userdata.name);
         
         // Redirect ke home
         setTimeout(() => {
