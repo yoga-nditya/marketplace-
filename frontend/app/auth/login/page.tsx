@@ -4,23 +4,24 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/authService";
+import Swal from "sweetalert2";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccess(null);
 
     if (!email || !password) {
-      setError("Email dan password wajib diisi.");
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Email dan password wajib diisi.",
+      });
       setLoading(false);
       return;
     }
@@ -29,20 +30,35 @@ export default function LoginPage() {
       const response = await authService.login({ email, password });
 
       if (response.success && response.data) {
-        setSuccess(response.message);
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: response.message,
+          showConfirmButton: false,
+          timer: 1500,
+        });
+
         // Simpan token ke localStorage
         localStorage.setItem("access_token", response.data.access_token);
         localStorage.setItem("token_type", response.data.token_type);
         
-        // Redirect ke home setelah 1.5 detik
+        // Redirect ke home
         setTimeout(() => {
           router.push("/");
         }, 1500);
       } else {
-        setError(response.message);
+        Swal.fire({
+          icon: "error",
+          title: "Gagal Login",
+          text: response.message,
+        });
       }
     } catch (err) {
-      setError("Terjadi kesalahan koneksi ke server.");
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan Sistem",
+        text: "Terjadi kesalahan koneksi ke server.",
+      });
     } finally {
       setLoading(false);
     }
@@ -54,18 +70,6 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-gray-900">Login GiftMoment</h1>
         <div className="w-16 h-0.5 bg-indigo-600 mx-auto mt-3"></div>
       </div>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 text-sm rounded">
-          {success}
-        </div>
-      )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>

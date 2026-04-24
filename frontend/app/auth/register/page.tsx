@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/authService";
+import Swal from "sweetalert2";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -12,23 +13,28 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccess(null);
 
+    // Basic Validation
     if (!userName || !email || !password || !confirmPassword) {
-      setError("Semua field wajib diisi.");
+      Swal.fire({
+        icon: "warning",
+        title: "Input Belum Lengkap",
+        text: "Semua field wajib diisi.",
+      });
       setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Password dan Konfirmasi Password tidak cocok.");
+      Swal.fire({
+        icon: "error",
+        title: "Password Tidak Cocok",
+        text: "Password dan Konfirmasi Password tidak cocok.",
+      });
       setLoading(false);
       return;
     }
@@ -42,15 +48,31 @@ export default function RegisterPage() {
       });
 
       if (response.success) {
-        setSuccess(response.message || "Registrasi berhasil! Silakan login.");
+        Swal.fire({
+          icon: "success",
+          title: "Registrasi Berhasil!",
+          text: response.message || "Silakan login dengan akun baru Anda.",
+          showConfirmButton: false,
+          timer: 2000,
+        });
+        
+        // Redirect ke login setelah 2 detik
         setTimeout(() => {
           router.push("/auth/login");
         }, 2000);
       } else {
-        setError(response.message);
+        Swal.fire({
+          icon: "error",
+          title: "Registrasi Gagal",
+          text: response.message,
+        });
       }
     } catch (err) {
-      setError("Terjadi kesalahan koneksi ke server.");
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan Sistem",
+        text: "Terjadi kesalahan koneksi ke server.",
+      });
     } finally {
       setLoading(false);
     }
@@ -62,18 +84,6 @@ export default function RegisterPage() {
         <h1 className="text-2xl font-bold text-gray-900">Register GiftMoment</h1>
         <div className="w-16 h-0.5 bg-indigo-600 mx-auto mt-3"></div>
       </div>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 text-sm rounded">
-          {success}
-        </div>
-      )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
