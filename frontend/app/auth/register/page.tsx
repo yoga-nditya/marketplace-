@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [userName, setUserName] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,7 +19,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     // Basic Validation
-    if (!userName || !email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       Swal.fire({
         icon: "warning",
         title: "Input Belum Lengkap",
@@ -41,7 +41,7 @@ export default function RegisterPage() {
 
     try {
       const response = await authService.register({
-        userName,
+        name,
         email,
         password,
         confirmPassword,
@@ -90,8 +90,8 @@ export default function RegisterPage() {
           <input
             type="text"
             placeholder="Nama"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             disabled={loading}
             className="w-full px-4 py-3 border border-gray-200 rounded text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-gray-50"
             required

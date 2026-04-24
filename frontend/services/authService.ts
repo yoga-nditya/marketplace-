@@ -10,7 +10,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   success: boolean;
   message: string;
-  data?: {
+  Userdata?: {
     access_token: string;
     token_type: string;
     expires_in: number;
@@ -20,7 +20,7 @@ export interface LoginResponse {
 }
 
 export interface RegisterRequest {
-  userName: string;
+  name: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -29,7 +29,7 @@ export interface RegisterRequest {
 export interface RegisterResponse {
   success: boolean;
   message: string;
-  data?: {
+  Userdata?: {
     id: string;
     name: string;
     email: string;

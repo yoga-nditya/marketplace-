@@ -29,7 +29,7 @@ export default function LoginPage() {
     try {
       const response = await authService.login({ email, password });
 
-      if (response.success && response.data) {
+      if (response.success && response.Userdata) {
         Swal.fire({
           icon: "success",
           title: "Berhasil!",
@@ -39,12 +39,12 @@ export default function LoginPage() {
         });
 
         // Simpan token ke localStorage
-        localStorage.setItem("access_token", response.data.access_token);
-        localStorage.setItem("token_type", response.data.token_type);
+        localStorage.setItem("access_token", response.Userdata.access_token);
+        localStorage.setItem("token_type", response.Userdata.token_type);
         
         // Redirect ke home
         setTimeout(() => {
-          router.push("/");
+          window.location.href = "/";
         }, 1500);
       } else {
         Swal.fire({
