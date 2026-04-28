@@ -1,118 +1,67 @@
-# Issue: Implementasi Fitur Login dan Register
+# Rencana Implementasi Halaman Admin Dashboard
 
-## Deskripsi
-Tugas ini adalah menghubungkan halaman Login dan Register yang sudah ada di frontend dengan API backend (`api/login` dan `api/register`).
+Dokumen ini berisi panduan langkah demi langkah untuk mengimplementasikan fitur Admin Dashboard pada aplikasi Marketplace. Panduan ini dirancang untuk diikuti oleh Junior Programmer atau AI Agent agar pengerjaan dapat dilakukan secara bertahap dan terstruktur.
 
-## Spesifikasi API
-
-### 1. Endpoint Login (`POST /api/login`)
-
-**Request Body:**
-```json
-{
-    "email": "string",
-    "password": "string"
-}
-```
-
-**Response Success:**
-```json
-{
-    "success": true,
-    "message": "Login berhasil",
-    "data": {
-        "access_token": "string",
-        "token_type": "string",
-        "expires_in": 3600,
-        ".issued": "string",
-        ".expires": "string"
-    }
-}
-```
-
-**Response Error:**
-```json
-{
-    "success": false,
-    "message": "error(bisa email salah, password salah, user tidak ditemukan atau error bad request atau internal server error)"
-}
-```
+**Aturan Pengerjaan**: 
+- Ikuti setiap langkah secara berurutan.
+- Fokus pada pembuatan User Interface (UI) dan integrasi dasar sesuai instruksi.
+- Terapkan praktik desain terbaik agar halaman terlihat rapi dan profesional.
 
 ---
 
-### 2. Endpoint Register (`POST /api/register`)
+## Tahap 1: Persiapan dan Konfigurasi Routing
+1. Buat struktur folder baru di dalam direktori frontend (misal: `src/pages/Admin/`) khusus untuk mengelompokkan halaman-halaman admin.
+2. Tambahkan konfigurasi rute baru di file routing utama aplikasi untuk halaman admin.
+3. Terapkan *nested routing* (rute bersarang) agar semua halaman admin berbagi satu layout utama (Sidebar dan Navbar). Rute yang harus dibuat meliputi:
+   - `/admin` (Halaman Dashboard Utama)
+   - `/admin/products` (Halaman Manajemen Produk)
+   - `/admin/categories` (Halaman Manajemen Kategori)
+   - `/admin/users` (Halaman Daftar Pengguna)
 
-**Request Body:**
-```json
-{
-    "userName": "string",
-    "email": "string",
-    "password": "string",
-    "confirmPassword": "string"
-}
-```
+## Tahap 2: Pembuatan Komponen Layout Utama (Sidebar dan Navbar)
+1. Buat komponen `AdminLayout` yang akan bertindak sebagai *wrapper* atau pembungkus konten utama halaman admin.
+2. **Pembuatan Navbar Admin**:
+   - Buat komponen Navbar yang menempel di bagian atas layar.
+   - Isi Navbar dengan informasi relevan seperti nama panel ("Admin Panel") dan profil admin yang sedang login.
+3. **Pembuatan Sidebar Admin**:
+   - Buat komponen Sidebar yang berada di sisi kiri layar dengan lebar tetap.
+   - Tambahkan menu navigasi menuju halaman Dashboard, Kategori, Produk, dan Pengguna.
+   - Buat indikator visual untuk menandai menu mana yang sedang aktif saat ini.
+4. Gabungkan Navbar dan Sidebar dengan gaya tata letak grid/flexbox sehingga ketika pindah menu, hanya konten utama di sebelah kanan yang berubah sementara Sidebar dan Navbar tetap statis.
 
-**Response Success (HTTP Status 201):**
-```json
-{
-    "success": true,
-    "message": "Register berhasil",
-    "data": {
-        "id": "string",
-        "name": "string",
-        "email": "string",
-        "role": "string"
-    }
-}
-```
+## Tahap 3: Implementasi Halaman Dashboard Utama (`/admin`)
+1. Rancang halaman utama yang akan tampil pertama kali saat membuka panel admin.
+2. Buat komponen "Statistik Card" (Kartu Informasi).
+3. Susun 4 kartu statistik secara menyamping (berjejer ke samping) menggunakan grid layout (misal `grid-cols-4`).
+4. Isi kartu tersebut dengan informasi ringkasan placeholder terlebih dahulu (contoh: Total Pengguna, Total Penjualan, Total Produk, dll).
 
-**Response Error:**
-```json
-{
-    "success": false,
-    "message": "error(bisa email sudah ada atau password tidak cocok atau error bad request atau internal server error)"
-}
-```
+## Tahap 4: Implementasi Halaman Manajemen Kategori (`/admin/categories`)
+1. Buat antarmuka utama untuk melihat seluruh kategori.
+2. Tampilkan data kategori menggunakan desain "Card" (kartu) alih-alih tabel.
+3. Susun kartu-kartu kategori tersebut agar berjejer menyamping, persis seperti tata letak di halaman depan, maksimal 4 kartu dalam satu baris.
+4. Di dalam setiap kartu kategori, wajib menampilkan:
+   - Gambar visual kategori.
+   - Nama Kategori.
+   - Tombol **Edit** (untuk mengubah kategori).
+   - Tombol **Delete** (untuk menghapus kategori).
+5. Buat tombol global "Tambah Kategori Baru" di bagian atas halaman yang akan memicu form penambahan data.
 
----
+## Tahap 5: Implementasi Halaman Manajemen Produk (`/admin/products`)
+1. Rancang halaman ini menggunakan format tata letak yang persis sama dengan halaman Kategori.
+2. Tampilkan produk dalam bentuk kartu yang berjejer 4 ke samping.
+3. Di dalam setiap kartu produk, tampilkan:
+   - Gambar Produk.
+   - Nama Produk.
+   - Harga Produk.
+   - Tombol **Edit**.
+   - Tombol **Delete**.
+4. Sediakan tombol "Tambah Produk Baru" beserta formnya (bisa berupa modal atau halaman baru). Pastikan pada form produk terdapat input *dropdown* untuk memilih kategori.
 
-## Tahapan Implementasi
+## Tahap 6: Implementasi Halaman Daftar Pengguna (`/admin/users`)
+1. Rancang halaman untuk melihat siapa saja pengguna atau user yang terdaftar di aplikasi.
+2. Karena informasi ini sifatnya hanya untuk dilihat (read-only), Anda bisa menampilkannya menggunakan format daftar (list) atau tabel sederhana yang rapi.
+3. Tampilkan kolom informasi dasar seperti Nama, Email, dan Role pengguna.
 
-Berikut adalah langkah-langkah detail yang harus dilakukan untuk menyelesaikan task ini. Tidak perlu menuliskan kode, cukup ikuti instruksi alur berikut:
-
-1. **Setup State Management pada Form:**
-   - **Login:** Buat state/variabel untuk menampung nilai input `email` dan `password`. Hubungkan state ini dengan field input di form login.
-   - **Register:** Buat state/variabel untuk menampung nilai input `userName`, `email`, `password`, dan `confirmPassword`. Hubungkan state ini dengan field input di form register.
-
-2. **Implementasi Validasi Form (Frontend):**
-   - Sebelum data dikirim ke API, buat validasi sederhana untuk memastikan semua field yang wajib sudah terisi.
-   - Khusus untuk form Register, pastikan nilai `password` dan `confirmPassword` sama persis. Tampilkan pesan error di UI jika tidak sama dan cegah form dikirim.
-
-3. **Pembuatan Fungsi Pemanggilan API:**
-   - Buat fungsi asinkronus untuk mengirimkan *HTTP POST request* ke endpoint `/api/login` dengan membawa *payload* berupa object request body login.
-   - Buat fungsi asinkronus untuk mengirimkan *HTTP POST request* ke endpoint `/api/register` dengan membawa *payload* berupa object request body register.
-   - Pastikan *request headers* diset untuk menerima dan mengirim format JSON (misalnya `Content-Type: application/json`).
-
-4. **Penanganan Submit Form Login:**
-   - Pada event `onSubmit` di form login, cegah perilaku default *refresh* halaman dan panggil fungsi API Login.
-   - **Jika berhasil (`success: true`):**
-     - Ekstrak `access_token` dari dalam response `data`.
-     - Simpan token tersebut ke media penyimpanan browser (misalnya `localStorage`, `sessionStorage`, atau `cookies` sesuai konvensi project).
-     - Tampilkan notifikasi (misal menggunakan toast atau alert) dengan pesan keberhasilan kepada user.
-     - *Redirect* (arahkan) user pindah ke halaman utama/dashboard secara otomatis.
-   - **Jika gagal (`success: false` atau error jaringan):**
-     - Tangkap pesan error (dari `response.message`).
-     - Tampilkan pesan error tersebut di UI agar user tahu mengapa login gagal (misal: "email/password salah").
-
-5. **Penanganan Submit Form Register:**
-   - Pada event `onSubmit` di form register, cegah perilaku default *refresh* halaman dan panggil fungsi API Register.
-   - **Jika berhasil (Status HTTP 201 dan `success: true`):**
-     - Tampilkan notifikasi sukses kepada user bahwa registrasi telah berhasil dilakukan.
-     - Kosongkan isi form dan *redirect* user ke halaman Login agar mereka bisa mencoba masuk dengan akun yang baru saja dibuat.
-   - **Jika gagal (`success: false` atau error jaringan):**
-     - Tangkap pesan error dari response (misalnya "email sudah terdaftar").
-     - Tampilkan pesan error tersebut di bagian form yang sesuai agar user dapat memperbaikinya.
-
-6. **Penanganan Indikator Loading (Opsional tapi Direkomendasikan):**
-   - Tambahkan state indikator loading yang bernilai `true` sesaat sebelum API dipanggil, dan `false` saat API selesai memberikan response (baik sukses maupun error).
-   - Gunakan indikator ini untuk menonaktifkan (*disable*) tombol submit dan menampilkan animasi loading, guna mencegah user menekan tombol berkali-kali saat proses sedang berlangsung.
+## Tahap 7: Integrasi Fungsional dan Notifikasi
+1. Setelah semua layout selesai, sambungkan fungsionalitas tombol "Edit" dan "Delete" untuk memunculkan form ubah data atau dialog konfirmasi penghapusan (menggunakan modal dialog atau SweetAlert).
+2. Pastikan ada penanda *loading* saat memuat data dan berikan *feedback* visual (pesan sukses/gagal) saat Admin melakukan operasi tambah, ubah, atau hapus data.
