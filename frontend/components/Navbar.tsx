@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, User, LogOut, ChevronDown, ClipboardList } from "lucide-react";
+import { ShoppingCart, User, LogOut, ChevronDown, ClipboardList, LayoutDashboard } from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function Navbar() {
@@ -14,13 +14,11 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check if token exists in localStorage
     const token = localStorage.getItem("access_token");
     const name = localStorage.getItem("user_name");
     setIsLoggedIn(!!token);
     if (name) setUserName(name);
 
-    // Close dropdown when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
@@ -61,7 +59,6 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
       <div className="max-w-[1280px] mx-auto px-6 h-20 flex items-center justify-between">
-        {/* Logo Section */}
         <Link href="/" className="flex items-center gap-3 group">
           <img 
             src="/logo_GiftMoment.png" 
@@ -73,7 +70,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Navigation Links & Auth */}
         <div className="hidden md:flex items-center gap-10">
           <div className="flex items-center gap-10 h-20">
             <Link
@@ -102,7 +98,6 @@ export default function Navbar() {
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Dropdown Menu */}
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-3 w-56 bg-white border border-gray-100 rounded-lg shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                     <Link 
@@ -113,6 +108,16 @@ export default function Navbar() {
                       <User className="w-5 h-5" />
                       <span className="font-medium">Edit Profil</span>
                     </Link>
+                    {userName.toLowerCase() === "admin" && (
+                      <Link 
+                        href="/admin" 
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-[#5E5CE6] hover:bg-indigo-50 transition-colors"
+                      >
+                        <LayoutDashboard className="w-5 h-5" />
+                        <span className="font-bold">Panel Admin</span>
+                      </Link>
+                    )}
                     <Link 
                       href="/orders" 
                       onClick={() => setIsDropdownOpen(false)}

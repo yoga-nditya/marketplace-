@@ -38,7 +38,7 @@ export interface RegisterResponse {
   };
 }
 
-export const authService = {
+export const authservice = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
     try {
       const response = await axios.post<LoginResponse>(`${API_URL}/api/login`, data);
@@ -69,3 +69,5 @@ export const authService = {
     }
   },
 };
+
+export default authservice;

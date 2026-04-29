@@ -36,7 +36,6 @@ func ConnectDB() {
 		log.Println("Successfully connected to the database")
 	}
 
-	// Auto Migration
 	db.AutoMigrate(&model.User{}, &model.UserToken{})
 
 	DB = db
