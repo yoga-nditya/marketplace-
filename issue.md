@@ -1,67 +1,111 @@
-# Rencana Implementasi Halaman Admin Dashboard
+# Task: Implementasi API Admin Category
 
-Dokumen ini berisi panduan langkah demi langkah untuk mengimplementasikan fitur Admin Dashboard pada aplikasi Marketplace. Panduan ini dirancang untuk diikuti oleh Junior Programmer atau AI Agent agar pengerjaan dapat dilakukan secara bertahap dan terstruktur.
+## Deskripsi
+Buat API untuk mengelola data kategori khusus untuk halaman admin. API ini mencakup operasi CRUD (Create, Read, Update, Delete) dan harus diimplementasikan mengikuti struktur/pola kode yang mirip dengan endpoint `categories` yang sudah ada sebelumnya.
 
-**Aturan Pengerjaan**: 
-- Ikuti setiap langkah secara berurutan.
-- Fokus pada pembuatan User Interface (UI) dan integrasi dasar sesuai instruksi.
-- Terapkan praktik desain terbaik agar halaman terlihat rapi dan profesional.
+## Endpoint
+- `GET /api/admin/category`
+- `POST /api/admin/category`
+- `PUT /api/admin/category/{id}`
+- `DELETE /api/admin/category/{id}`
+
+## Struktur Database
+Response data yang dikembalikan (khususnya untuk GET) harus mencakup semua field di database berikut:
+| Field      | Type         | Null | Key | Default | Extra |
+|------------|--------------|------|-----|---------|-------|
+| id         | char(36)     | NO   | PRI | NULL    |       |
+| name       | varchar(255) | NO   |     | NULL    |       |
+| image      | varchar(255) | YES  |     | NULL    |       |
+| slug       | varchar(255) | NO   |     | NULL    |       |
+| deleted_at | timestamp    | YES  |     | NULL    |       |
+| created_at | timestamp    | YES  |     | NULL    |       |
+| updated_at | timestamp    | YES  |     | NULL    |       |
+
+## Struktur Direktori & File
+Kode baru harus diletakkan di dalam `src/admin` dengan pembagian struktur:
+- **Routes** (`src/admin/routes/admin-category-routes.ts`): Berisi definisi routing HTTP.
+- **Service** (`src/admin/service/admin-category-service.ts`): Berisi *business logic* untuk operasi kategori.
+
+## Spesifikasi Payload Request & Response
+
+### 1. GET `/api/admin/category` (200 Success)
+**Response:**
+```json
+{
+   "Categorydata": [
+        {
+            "id": "string",
+            "name": "string",
+            "image": "string",
+            "slug": "string",
+            "deleted_at": "timestamp | null",
+            "created_at": "timestamp",
+            "updated_at": "timestamp"
+        }
+   ]
+}
+```
+
+### 2. POST `/api/admin/category` (201 Created)
+**Request Body:**
+```json
+{
+    "name": "string",
+    "image": "string",
+    "slug": "string" // Dihasilkan mengikuti "name"
+}
+```
+
+### 3. PUT `/api/admin/category/{id}` (200 Success)
+**Response:**
+```json
+{
+    "success": true,
+    "message": "data berhasil di update"
+}
+```
+
+### 4. DELETE `/api/admin/category/{id}` (200 Success)
+**Response:**
+```json
+{
+    "success": true,
+    "message": "data berhasil dihapus"
+}
+```
+
+### Format Response Error
+**Response (Contoh: 400 Bad Request, 500 Internal Server Error, dll):**
+```json
+{
+    "success": false,
+    "message": "error (bisa kategori gagal ditambahkan, error bad request, atau internal server error tergantung method yang digunakan)"
+}
+```
 
 ---
 
-## Tahap 1: Persiapan dan Konfigurasi Routing
-1. Buat struktur folder baru di dalam direktori frontend (misal: `src/pages/Admin/`) khusus untuk mengelompokkan halaman-halaman admin.
-2. Tambahkan konfigurasi rute baru di file routing utama aplikasi untuk halaman admin.
-3. Terapkan *nested routing* (rute bersarang) agar semua halaman admin berbagi satu layout utama (Sidebar dan Navbar). Rute yang harus dibuat meliputi:
-   - `/admin` (Halaman Dashboard Utama)
-   - `/admin/products` (Halaman Manajemen Produk)
-   - `/admin/categories` (Halaman Manajemen Kategori)
-   - `/admin/users` (Halaman Daftar Pengguna)
+## Tahapan Implementasi (Panduan untuk Programmer / Model AI)
+Berikut adalah langkah-langkah detail yang perlu dilakukan tanpa perlu menuliskan kode:
 
-## Tahap 2: Pembuatan Komponen Layout Utama (Sidebar dan Navbar)
-1. Buat komponen `AdminLayout` yang akan bertindak sebagai *wrapper* atau pembungkus konten utama halaman admin.
-2. **Pembuatan Navbar Admin**:
-   - Buat komponen Navbar yang menempel di bagian atas layar.
-   - Isi Navbar dengan informasi relevan seperti nama panel ("Admin Panel") dan profil admin yang sedang login.
-3. **Pembuatan Sidebar Admin**:
-   - Buat komponen Sidebar yang berada di sisi kiri layar dengan lebar tetap.
-   - Tambahkan menu navigasi menuju halaman Dashboard, Kategori, Produk, dan Pengguna.
-   - Buat indikator visual untuk menandai menu mana yang sedang aktif saat ini.
-4. Gabungkan Navbar dan Sidebar dengan gaya tata letak grid/flexbox sehingga ketika pindah menu, hanya konten utama di sebelah kanan yang berubah sementara Sidebar dan Navbar tetap statis.
+1. **Analisis Pola yang Sudah Ada:**
+   - Review kembali file route dan service pada fitur `categories` yang sudah ada (bukan admin) untuk memastikan Anda memahami style code, dependensi database, dan cara *error handling* yang berjalan.
 
-## Tahap 3: Implementasi Halaman Dashboard Utama (`/admin`)
-1. Rancang halaman utama yang akan tampil pertama kali saat membuka panel admin.
-2. Buat komponen "Statistik Card" (Kartu Informasi).
-3. Susun 4 kartu statistik secara menyamping (berjejer ke samping) menggunakan grid layout (misal `grid-cols-4`).
-4. Isi kartu tersebut dengan informasi ringkasan placeholder terlebih dahulu (contoh: Total Pengguna, Total Penjualan, Total Produk, dll).
+2. **Pembuatan File Service (`admin-category-service.ts`):**
+   - Buat fungsi untuk **GET**: Tarik data dari tabel kategori dengan memastikan seluruh field seperti `id`, `name`, `image`, `slug`, `created_at`, `updated_at`, dan `deleted_at` ikut di-query.
+   - Buat fungsi untuk **POST**: Siapkan fungsi insert data baru yang menerima `name`, `image`, dan `slug`. Atur logika untuk memanipulasi string `name` menjadi format *URL-friendly* untuk diisi ke `slug` jika tidak tersedia.
+   - Buat fungsi untuk **PUT**: Siapkan fungsi update berdasarkan `id`.
+   - Buat fungsi untuk **DELETE**: Siapkan fungsi delete berdasarkan `id` (bisa *hard delete* atau *soft delete* menyesuaikan pola aplikasi menggunakan kolom `deleted_at`).
 
-## Tahap 4: Implementasi Halaman Manajemen Kategori (`/admin/categories`)
-1. Buat antarmuka utama untuk melihat seluruh kategori.
-2. Tampilkan data kategori menggunakan desain "Card" (kartu) alih-alih tabel.
-3. Susun kartu-kartu kategori tersebut agar berjejer menyamping, persis seperti tata letak di halaman depan, maksimal 4 kartu dalam satu baris.
-4. Di dalam setiap kartu kategori, wajib menampilkan:
-   - Gambar visual kategori.
-   - Nama Kategori.
-   - Tombol **Edit** (untuk mengubah kategori).
-   - Tombol **Delete** (untuk menghapus kategori).
-5. Buat tombol global "Tambah Kategori Baru" di bagian atas halaman yang akan memicu form penambahan data.
+3. **Pembuatan File Routes (`admin-category-routes.ts`):**
+   - Import service yang telah dibuat dan tentukan method-method rute (`router.get`, `router.post`, `router.put`, `router.delete`).
+   - Ekstrak *request body* atau param ID dari rute lalu masukkan ke dalam argumen *service handler*.
+   - Standarkan blok *Try/Catch* pada setiap rute. Jika berhasil (200/201), kembalikan response objek sesuai spesifikasi.
+   - Jika gagal, tangkap *exception* dan kembalikan response format error dengan status HTTP yang sesuai (400 atau 500) dan `"success": false`.
 
-## Tahap 5: Implementasi Halaman Manajemen Produk (`/admin/products`)
-1. Rancang halaman ini menggunakan format tata letak yang persis sama dengan halaman Kategori.
-2. Tampilkan produk dalam bentuk kartu yang berjejer 4 ke samping.
-3. Di dalam setiap kartu produk, tampilkan:
-   - Gambar Produk.
-   - Nama Produk.
-   - Harga Produk.
-   - Tombol **Edit**.
-   - Tombol **Delete**.
-4. Sediakan tombol "Tambah Produk Baru" beserta formnya (bisa berupa modal atau halaman baru). Pastikan pada form produk terdapat input *dropdown* untuk memilih kategori.
+4. **Integrasi Router ke Aplikasi Utama:**
+   - Setelah route didefinisikan secara independen, jangan lupa menyambungkannya/meng-import file `admin-category-routes.ts` ke dalam index/main router aplikasi (`src/app.ts` atau `src/routes/index.ts`) dengan prefix `/api/admin/category`.
 
-## Tahap 6: Implementasi Halaman Daftar Pengguna (`/admin/users`)
-1. Rancang halaman untuk melihat siapa saja pengguna atau user yang terdaftar di aplikasi.
-2. Karena informasi ini sifatnya hanya untuk dilihat (read-only), Anda bisa menampilkannya menggunakan format daftar (list) atau tabel sederhana yang rapi.
-3. Tampilkan kolom informasi dasar seperti Nama, Email, dan Role pengguna.
-
-## Tahap 7: Integrasi Fungsional dan Notifikasi
-1. Setelah semua layout selesai, sambungkan fungsionalitas tombol "Edit" dan "Delete" untuk memunculkan form ubah data atau dialog konfirmasi penghapusan (menggunakan modal dialog atau SweetAlert).
-2. Pastikan ada penanda *loading* saat memuat data dan berikan *feedback* visual (pesan sukses/gagal) saat Admin melakukan operasi tambah, ubah, atau hapus data.
+5. **Pengujian Mandiri:**
+   - Lakukan pemeriksaan aliran data (uji GET, lalu POST data baru, lalu uji GET lagi untuk verifikasi masuk, kemudian PUT edit data, dan terakhir DELETE).
+   - Validasi response *success* maupun format *error* sesuai format JSON yang didefinisikan.
