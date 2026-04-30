@@ -1,5 +1,6 @@
 import { Category } from "@/services/categoryService";
 import { LayoutGrid } from "lucide-react";
+import { getImageUrl } from "@/services/utils";
 
 interface CategoryTabsProps {
   categories: Category[];
@@ -8,19 +9,6 @@ interface CategoryTabsProps {
 }
 
 export default function CategoryTabs({ categories, activeCategoryId, onCategoryChange }: CategoryTabsProps) {
-  const getImageUrl = (imagePath: string) => {
-    if (!imagePath) return "";
-    if (imagePath.startsWith("http")) return imagePath;
-
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-    let cleanPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
-    
-    if (!cleanPath.includes("/assets/")) {
-      cleanPath = `/assets/img/category${cleanPath}`;
-    }
-
-    return `${baseUrl}${cleanPath}`;
-  };
 
   return (
     <div className="mb-8">

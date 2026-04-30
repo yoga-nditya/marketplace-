@@ -1,7 +1,10 @@
 package admin_controller
 
 import (
+	"fmt"
 	admin_service "marketplace-backend/src/service/admin"
+	"path/filepath"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -35,20 +38,22 @@ func GetCategoryByID(c *fiber.Ctx) error {
 }
 
 func CreateCategory(c *fiber.Ctx) error {
-	var body struct {
-		Name  string `json:"name"`
-		Image string `json:"image"`
-		Slug  string `json:"slug"`
+	name := c.FormValue("name")
+	slug := c.FormValue("slug")
+	file, err := c.FormFile("image")
+
+	var imageName string
+	if err == nil {
+		imageName = fmt.Sprintf("%d%s", time.Now().UnixNano(), filepath.Ext(file.Filename))
+		if err := c.SaveFile(file, "./assets/category/"+imageName); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "gagal menyimpan gambar",
+			})
+		}
 	}
 
-	if err := c.BodyParser(&body); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "error bad request",
-		})
-	}
-
-	if err := admin_service.CreateCategory(body.Name, body.Image, body.Slug); err != nil {
+	if err := admin_service.CreateCategory(name, imageName, slug); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "kategori gagal ditambahkan",
@@ -63,20 +68,22 @@ func CreateCategory(c *fiber.Ctx) error {
 
 func UpdateCategory(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var body struct {
-		Name  string `json:"name"`
-		Image string `json:"image"`
-		Slug  string `json:"slug"`
+	name := c.FormValue("name")
+	slug := c.FormValue("slug")
+	file, err := c.FormFile("image")
+
+	var imageName string
+	if err == nil {
+		imageName = fmt.Sprintf("%d%s", time.Now().UnixNano(), filepath.Ext(file.Filename))
+		if err := c.SaveFile(file, "./assets/category/"+imageName); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "gagal menyimpan gambar baru",
+			})
+		}
 	}
 
-	if err := c.BodyParser(&body); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "error bad request",
-		})
-	}
-
-	if err := admin_service.UpdateCategory(id, body.Name, body.Image, body.Slug); err != nil {
+	if err := admin_service.UpdateCategory(id, name, imageName, slug); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "data gagal di update",

@@ -1,22 +1,49 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronLeft, Upload } from "lucide-react";
-import { createCategory } from "@/services/adminCategoryService";
+import { fetchCategoryById, updateCategory } from "@/services/adminCategoryService";
 import { getImageUrl } from "@/services/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Swal from "sweetalert2";
 
-export default function AddCategory() {
+export default function EditCategory() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
+
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [existingImageUrl, setExistingImageUrl] = useState<string>("");
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const getCategory = async () => {
+      setLoading(true);
+      const data = await fetchCategoryById(id);
+      if (data) {
+        setFormData({
+          name: data.name,
+          slug: data.slug,
+        });
+        setExistingImageUrl(getImageUrl(data.image));
+      } else {
+        Swal.fire("Error", "Kategori tidak ditemukan", "error");
+        router.push("/admin/categories");
+      }
+      setLoading(false);
+    };
+
+    if (id) {
+      getCategory();
+    }
+  }, [id, router]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
@@ -52,7 +79,7 @@ export default function AddCategory() {
     }
 
     setSubmitting(true);
-    const response = await createCategory(data);
+    const response = await updateCategory(id, data);
     setSubmitting(false);
 
     if (response.success) {
@@ -62,6 +89,14 @@ export default function AddCategory() {
       Swal.fire("Gagal!", response.message, "error");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <p className="text-gray-500">Memuat data kategori...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -73,7 +108,7 @@ export default function AddCategory() {
           <ChevronLeft className="w-5 h-5" />
           Kembali
         </Link>
-        <h1 className="text-2xl font-bold text-gray-800">Form Tambah Kategori</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Form Edit Kategori</h1>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-2xl">
@@ -101,7 +136,7 @@ export default function AddCategory() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700">Upload Gambar</label>
+            <label className="text-sm font-bold text-gray-700">Upload Gambar Baru (Opsional)</label>
             <div className="flex items-center overflow-hidden border border-gray-200 rounded-lg bg-[#F8F9FD]">
               <label className="bg-[#1F2937] hover:bg-black text-white px-6 py-3 cursor-pointer font-bold text-sm transition-colors flex items-center gap-2">
                 <Upload className="w-4 h-4" />
@@ -109,17 +144,22 @@ export default function AddCategory() {
                 <input type="file" className="hidden" onChange={handleFileChange} accept="image/*" />
               </label>
               <span className="px-4 text-sm text-gray-400 truncate">
-                {selectedFile ? selectedFile.name : "Belum ada file terpilih"}
+                {selectedFile ? selectedFile.name : "Ganti gambar..."}
               </span>
             </div>
             
-            {previewUrl && (
+            {(previewUrl || existingImageUrl) && (
               <div className="mt-4">
-                <label className="text-xs font-bold text-gray-500 block mb-2">Preview Gambar:</label>
+                <label className="text-xs font-bold text-gray-500 block mb-2">
+                  {previewUrl ? "Preview Gambar Baru:" : "Gambar Saat Ini:"}
+                </label>
                 <img 
-                  src={previewUrl} 
+                  src={previewUrl || existingImageUrl} 
                   alt="Preview" 
                   className="w-32 h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=No+Image';
+                  }}
                 />
               </div>
             )}
@@ -130,7 +170,7 @@ export default function AddCategory() {
             disabled={submitting}
             className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] mt-4 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
-            {submitting ? "Menyimpan..." : "Tambah"}
+            {submitting ? "Menyimpan..." : "Update"}
           </button>
         </form>
       </div>
