@@ -14,6 +14,10 @@ type ProductApiResponse = {
   Productdata: Product[];
 };
 
+type SingleProductApiResponse = {
+  Productdata: Product;
+};
+
 export async function fetchProducts(): Promise<Product[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -23,5 +27,17 @@ export async function fetchProducts(): Promise<Product[]> {
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
+  }
+}
+
+export async function fetchProductById(id: string): Promise<Product | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  try {
+    const response = await axios.get<SingleProductApiResponse>(`${baseUrl}/api/products/${id}`);
+    return response.data.Productdata;
+  } catch (error) {
+    console.error("Error fetching product by id:", error);
+    return null;
   }
 }

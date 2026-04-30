@@ -12,13 +12,35 @@ import (
 func GetCategoriesAdmin(c *fiber.Ctx) error {
 	categories, err := admin_service.GetAllCategoriesAdmin()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "internal server error",
+		return c.Status(fiber.StatusInternalServerError).JSON(struct {
+			Success bool   `json:"success"`
+			Message string `json:"message"`
+		}{
+			Success: false,
+			Message: "internal server error",
 		})
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"Categorydata": categories,
+
+	if len(categories) == 0 {
+		return c.Status(fiber.StatusOK).JSON(struct {
+			Success      bool        `json:"success"`
+			Message      string      `json:"message"`
+			Categorydata interface{} `json:"Categorydata"`
+		}{
+			Success:      false,
+			Message:      "data tidak ditemukan",
+			Categorydata: fiber.Map{},
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(struct {
+		Success      bool        `json:"success"`
+		Message      string      `json:"message"`
+		Categorydata interface{} `json:"Categorydata"`
+	}{
+		Success:      true,
+		Message:      "data berhasil ditemukan",
+		Categorydata: categories,
 	})
 }
 
@@ -26,73 +48,153 @@ func GetCategoryByID(c *fiber.Ctx) error {
 	id := c.Params("id")
 	category, err := admin_service.GetCategoryByID(id)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"success": false,
-			"message": "kategori tidak ditemukan",
+		return c.Status(fiber.StatusNotFound).JSON(struct {
+			Success      bool        `json:"success"`
+			Message      string      `json:"message"`
+			Categorydata interface{} `json:"Categorydata"`
+		}{
+			Success:      false,
+			Message:      "data tidak ditemukan",
+			Categorydata: fiber.Map{},
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"Categorydata": category,
+	return c.Status(fiber.StatusOK).JSON(struct {
+		Success      bool        `json:"success"`
+		Message      string      `json:"message"`
+		Categorydata interface{} `json:"Categorydata"`
+	}{
+		Success:      true,
+		Message:      "data berhasil ditemukan",
+		Categorydata: category,
 	})
 }
 
 func CreateCategory(c *fiber.Ctx) error {
-	name := c.FormValue("name")
-	slug := c.FormValue("slug")
-	file, err := c.FormFile("image")
+	var name, slug string
 
+	// Handle JSON body
+	var body struct {
+		Name string `json:"name"`
+		Slug string `json:"slug"`
+	}
+	if err := c.BodyParser(&body); err == nil {
+		name = body.Name
+		slug = body.Slug
+	}
+
+	// Override with Form values if available
+	if c.FormValue("name") != "" {
+		name = c.FormValue("name")
+	}
+	if c.FormValue("slug") != "" {
+		slug = c.FormValue("slug")
+	}
+
+	file, err := c.FormFile("image")
 	var imageName string
 	if err == nil {
 		imageName = fmt.Sprintf("%d%s", time.Now().UnixNano(), filepath.Ext(file.Filename))
 		if err := c.SaveFile(file, "./assets/category/"+imageName); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"success": false,
-				"message": "gagal menyimpan gambar",
+			return c.Status(fiber.StatusInternalServerError).JSON(struct {
+				Success bool   `json:"success"`
+				Message string `json:"message"`
+			}{
+				Success: false,
+				Message: "gagal menyimpan gambar",
 			})
 		}
 	}
 
-	if err := admin_service.CreateCategory(name, imageName, slug); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "kategori gagal ditambahkan",
+	category, err := admin_service.CreateCategory(name, imageName, slug)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(struct {
+			Success bool   `json:"success"`
+			Message string `json:"message"`
+		}{
+			Success: false,
+			Message: err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"message": "kategori berhasil ditambahkan",
+	return c.Status(fiber.StatusCreated).JSON(struct {
+		Success      bool        `json:"success"`
+		Message      string      `json:"message"`
+		Categorydata interface{} `json:"Categorydata"`
+	}{
+		Success:      true,
+		Message:      "data kategori berhasil ditambahkan",
+		Categorydata: category,
 	})
 }
 
 func UpdateCategory(c *fiber.Ctx) error {
 	id := c.Params("id")
-	name := c.FormValue("name")
-	slug := c.FormValue("slug")
-	file, err := c.FormFile("image")
+	var name, slug string
 
+	// Handle JSON body
+	var body struct {
+		Name string `json:"name"`
+		Slug string `json:"slug"`
+	}
+	if err := c.BodyParser(&body); err == nil {
+		name = body.Name
+		slug = body.Slug
+	}
+
+	// Override with Form values if available
+	if c.FormValue("name") != "" {
+		name = c.FormValue("name")
+	}
+	if c.FormValue("slug") != "" {
+		slug = c.FormValue("slug")
+	}
+
+	file, err := c.FormFile("image")
 	var imageName string
 	if err == nil {
 		imageName = fmt.Sprintf("%d%s", time.Now().UnixNano(), filepath.Ext(file.Filename))
 		if err := c.SaveFile(file, "./assets/category/"+imageName); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"success": false,
-				"message": "gagal menyimpan gambar baru",
+			return c.Status(fiber.StatusInternalServerError).JSON(struct {
+				Success bool   `json:"success"`
+				Message string `json:"message"`
+			}{
+				Success: false,
+				Message: "gagal menyimpan gambar baru",
 			})
 		}
 	}
 
-	if err := admin_service.UpdateCategory(id, name, imageName, slug); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "data gagal di update",
+	category, err := admin_service.UpdateCategory(id, name, imageName, slug)
+	if err != nil {
+		if err.Error() == "kategori tidak ditemukan" {
+			return c.Status(fiber.StatusNotFound).JSON(struct {
+				Success      bool        `json:"success"`
+				Message      string      `json:"message"`
+				Categorydata interface{} `json:"Categorydata"`
+			}{
+				Success:      false,
+				Message:      "data tidak ditemukan",
+				Categorydata: fiber.Map{},
+			})
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(struct {
+			Success bool   `json:"success"`
+			Message string `json:"message"`
+		}{
+			Success: false,
+			Message: err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"message": "data kategori berhasil di update",
+	return c.Status(fiber.StatusOK).JSON(struct {
+		Success      bool        `json:"success"`
+		Message      string      `json:"message"`
+		Categorydata interface{} `json:"Categorydata"`
+	}{
+		Success:      true,
+		Message:      "data kategori berhasil di update",
+		Categorydata: category,
 	})
 }
 
@@ -100,14 +202,33 @@ func DeleteCategory(c *fiber.Ctx) error {
 	id := c.Params("id")
 
 	if err := admin_service.DeleteCategory(id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "data kategori gagal dihapus",
+		if err.Error() == "kategori tidak ditemukan" {
+			return c.Status(fiber.StatusNotFound).JSON(struct {
+				Success      bool        `json:"success"`
+				Message      string      `json:"message"`
+				Categorydata interface{} `json:"Categorydata"`
+			}{
+				Success:      false,
+				Message:      "data tidak ditemukan",
+				Categorydata: fiber.Map{},
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(struct {
+			Success bool   `json:"success"`
+			Message string `json:"message"`
+		}{
+			Success: false,
+			Message: err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"message": "data kategori berhasil dihapus",
+	return c.Status(fiber.StatusOK).JSON(struct {
+		Success      bool        `json:"success"`
+		Message      string      `json:"message"`
+		Categorydata interface{} `json:"Categorydata"`
+	}{
+		Success:      true,
+		Message:      "data kategori berhasil dihapus",
+		Categorydata: fiber.Map{"id": id},
 	})
 }

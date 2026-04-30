@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, ChevronDown, ChevronUp, Edit, Trash2, ArrowUpDown } from "lucide-react";
+import { Plus, Search, ChevronDown, ChevronUp, Edit, Trash2, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchAdminCategories, deleteCategory, Category } from "@/services/adminCategoryService";
 import { getImageUrl } from "@/services/utils";
 import Swal from "sweetalert2";
@@ -11,6 +11,9 @@ export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState<{ key: keyof Category; direction: 'asc' | 'desc' } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [entriesToShow, setEntriesToShow] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const getCategories = async () => {
     setLoading(true);
@@ -31,13 +34,20 @@ export default function AdminCategories() {
     setSortConfig({ key, direction });
   };
 
+  const filteredCategories = React.useMemo(() => {
+    return categories.filter(cat =>
+      cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cat.id.toString().includes(searchTerm)
+    );
+  }, [categories, searchTerm]);
+
   const sortedCategories = React.useMemo(() => {
-    let sortableItems = [...categories];
+    let sortableItems = [...filteredCategories];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
         const aValue = (a[sortConfig.key] || "").toString().toLowerCase();
         const bValue = (b[sortConfig.key] || "").toString().toLowerCase();
-        
+
         if (aValue < bValue) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
@@ -48,14 +58,25 @@ export default function AdminCategories() {
       });
     }
     return sortableItems;
-  }, [categories, sortConfig]);
+  }, [filteredCategories, sortConfig]);
+
+  const paginatedCategories = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * entriesToShow;
+    return sortedCategories.slice(startIndex, startIndex + entriesToShow);
+  }, [sortedCategories, currentPage, entriesToShow]);
+
+  const totalPages = Math.ceil(sortedCategories.length / entriesToShow);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, entriesToShow]);
 
   const SortIcon = ({ column }: { column: keyof Category }) => {
     if (!sortConfig || sortConfig.key !== column) {
       return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />;
     }
-    return sortConfig.direction === 'asc' ? 
-      <ChevronUp className="w-3 h-3 ml-1" /> : 
+    return sortConfig.direction === 'asc' ?
+      <ChevronUp className="w-3 h-3 ml-1" /> :
       <ChevronDown className="w-3 h-3 ml-1" />;
   };
 
@@ -97,9 +118,16 @@ export default function AdminCategories() {
         <div className="flex items-center gap-4 text-sm text-gray-600">
           <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
             <span>Show</span>
-            <div className="flex items-center gap-1 font-bold text-gray-900 cursor-pointer">
-              10 <ChevronDown className="w-4 h-4" />
-            </div>
+            <select
+              value={entriesToShow}
+              onChange={(e) => setEntriesToShow(Number(e.target.value))}
+              className="font-bold text-gray-900 bg-transparent border-none focus:outline-none cursor-pointer"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
             <span>entries</span>
           </div>
 
@@ -107,6 +135,8 @@ export default function AdminCategories() {
             <input
               type="text"
               placeholder="Search:"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm w-full md:w-64"
             />
             <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 group-focus-within:text-blue-500 transition-colors" />
@@ -119,7 +149,7 @@ export default function AdminCategories() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#5E5CE6] text-white">
-                <th 
+                <th
                   onClick={() => handleSort('id')}
                   className="px-6 py-4 text-xs font-bold uppercase tracking-wider border-r border-white/10 w-24 text-center cursor-pointer hover:bg-white/10 transition-colors"
                 >
@@ -128,7 +158,7 @@ export default function AdminCategories() {
                   </div>
                 </th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider border-r border-white/10">GAMBAR</th>
-                <th 
+                <th
                   onClick={() => handleSort('name')}
                   className="px-6 py-4 text-xs font-bold uppercase tracking-wider border-r border-white/10 cursor-pointer hover:bg-white/10 transition-colors"
                 >
@@ -146,21 +176,21 @@ export default function AdminCategories() {
                     Memuat data...
                   </td>
                 </tr>
-              ) : sortedCategories.length === 0 ? (
+              ) : paginatedCategories.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-10 text-center text-gray-500">
-                    Tidak ada data kategori.
+                    {searchTerm ? `Tidak ada hasil untuk "${searchTerm}"` : "Tidak ada data kategori."}
                   </td>
                 </tr>
               ) : (
-                sortedCategories.map((cat) => (
+                paginatedCategories.map((cat) => (
                   <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 text-sm text-gray-500 text-center border-r border-gray-50">{cat.id}</td>
                     <td className="px-6 py-4 border-r border-gray-50">
-                      <img 
-                        src={getImageUrl(cat.image)} 
-                        alt={cat.name} 
-                        className="w-12 h-12 object-cover rounded-lg shadow-sm border border-gray-100" 
+                      <img
+                        src={getImageUrl(cat.image)}
+                        alt={cat.name}
+                        className="w-12 h-12 object-cover rounded-lg shadow-sm border border-gray-100"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = 'https://via.placeholder.com/100?text=' + cat.name[0];
                         }}
@@ -174,7 +204,7 @@ export default function AdminCategories() {
                             <Edit className="w-4 h-4" />
                           </button>
                         </Link>
-                        <button 
+                        <button
                           onClick={() => handleDelete(cat.id)}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                         >
@@ -189,11 +219,47 @@ export default function AdminCategories() {
           </table>
         </div>
 
-        <div className="h-1 bg-gray-100 w-full relative overflow-hidden">
-          <div className="absolute top-0 left-0 h-full bg-gray-300 w-1/3 rounded-full"></div>
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-sm text-gray-600">
+            Showing {Math.min((currentPage - 1) * entriesToShow + 1, sortedCategories.length)} to {Math.min(currentPage * entriesToShow, sortedCategories.length)} of {sortedCategories.length} entries
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-1">
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all ${currentPage === i + 1
+                      ? "bg-[#3B82F6] text-white shadow-sm"
+                      : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-

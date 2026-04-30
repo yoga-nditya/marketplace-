@@ -17,9 +17,9 @@ func GetCategoryByID(id string) (model.Category, error) {
 	return repository.GetCategoryByID(id)
 }
 
-func CreateCategory(name, image, slug string) error {
+func CreateCategory(name, image, slug string) (model.Category, error) {
 	if name == "" {
-		return errors.New("nama kategori tidak boleh kosong")
+		return model.Category{}, errors.New("nama kategori tidak boleh kosong")
 	}
 
 	if slug == "" {
@@ -33,13 +33,17 @@ func CreateCategory(name, image, slug string) error {
 		Slug:  slug,
 	}
 
-	return repository.CreateCategory(category)
+	if err := repository.CreateCategory(category); err != nil {
+		return model.Category{}, err
+	}
+
+	return category, nil
 }
 
-func UpdateCategory(id, name, image, slug string) error {
+func UpdateCategory(id, name, image, slug string) (model.Category, error) {
 	category, err := repository.GetCategoryByID(id)
 	if err != nil {
-		return errors.New("kategori tidak ditemukan")
+		return model.Category{}, errors.New("kategori tidak ditemukan")
 	}
 
 	if name != "" {
@@ -57,7 +61,11 @@ func UpdateCategory(id, name, image, slug string) error {
 		category.Slug = slug
 	}
 
-	return repository.UpdateCategory(category)
+	if err := repository.UpdateCategory(category); err != nil {
+		return model.Category{}, err
+	}
+
+	return category, nil
 }
 
 func DeleteCategory(id string) error {

@@ -37,7 +37,7 @@ export async function fetchAdminCategories(): Promise<Category[]> {
 
 export async function fetchCategoryById(id: string): Promise<Category | null> {
   try {
-    const response = await axios.get<SingleCategoryApiResponse>(`${baseUrl}/api/admin/category/${id}`);
+    const response = await axios.get<SingleCategoryApiResponse>(`${baseUrl}/api/admin/categories/${id}`);
     return response.data.Categorydata;
   } catch (error) {
     console.error("Error fetching category by id:", error);
@@ -47,7 +47,7 @@ export async function fetchCategoryById(id: string): Promise<Category | null> {
 
 export async function createCategory(data: FormData): Promise<SuccessResponse> {
   try {
-    const response = await axios.post<SuccessResponse>(`${baseUrl}/api/admin/category`, data, {
+    const response = await axios.post<SuccessResponse>(`${baseUrl}/api/admin/categories`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -63,7 +63,7 @@ export async function createCategory(data: FormData): Promise<SuccessResponse> {
 
 export async function updateCategory(id: string, data: FormData): Promise<SuccessResponse> {
   try {
-    const response = await axios.put<SuccessResponse>(`${baseUrl}/api/admin/category/${id}`, data, {
+    const response = await axios.put<SuccessResponse>(`${baseUrl}/api/admin/categories/${id}`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -79,7 +79,7 @@ export async function updateCategory(id: string, data: FormData): Promise<Succes
 
 export async function deleteCategory(id: string): Promise<SuccessResponse> {
   try {
-    const response = await axios.delete<SuccessResponse>(`${baseUrl}/api/admin/category/${id}`);
+    const response = await axios.delete<SuccessResponse>(`${baseUrl}/api/admin/categories/${id}`);
     return response.data;
   } catch (error: any) {
     return {

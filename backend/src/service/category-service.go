@@ -8,3 +8,7 @@ import (
 func GetAllCategories() ([]model.Category, error) {
 	return repository.GetAllCategories()
 }
+
+func GetCategoryByID(id string) (model.Category, error) {
+	return repository.GetCategoryByID(id)
+}
