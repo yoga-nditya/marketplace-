@@ -1,35 +1,17 @@
-# Task: Implementasi API Admin Category
+# Perencanaan Implementasi Fetch API Kategori pada Halaman Admin
 
-## Deskripsi
-Buat API untuk mengelola data kategori khusus untuk halaman admin. API ini mencakup operasi CRUD (Create, Read, Update, Delete) dan harus diimplementasikan mengikuti struktur/pola kode yang mirip dengan endpoint `categories` yang sudah ada sebelumnya.
+## Tujuan
+Mengimplementasikan integrasi dari sisi frontend untuk halaman admin category dan form admin agar dapat melakukan operasi CRUD (Create, Read, Update, Delete) menggunakan API `/api/admin/category` yang sudah dibuat dan tersedia di backend.
 
-## Endpoint
-- `GET /api/admin/category`
-- `POST /api/admin/category`
-- `PUT /api/admin/category/{id}`
-- `DELETE /api/admin/category/{id}`
+---
 
-## Struktur Database
-Response data yang dikembalikan (khususnya untuk GET) harus mencakup semua field di database berikut:
-| Field      | Type         | Null | Key | Default | Extra |
-|------------|--------------|------|-----|---------|-------|
-| id         | char(36)     | NO   | PRI | NULL    |       |
-| name       | varchar(255) | NO   |     | NULL    |       |
-| image      | varchar(255) | YES  |     | NULL    |       |
-| slug       | varchar(255) | NO   |     | NULL    |       |
-| deleted_at | timestamp    | YES  |     | NULL    |       |
-| created_at | timestamp    | YES  |     | NULL    |       |
-| updated_at | timestamp    | YES  |     | NULL    |       |
+## Spesifikasi API yang Tersedia
 
-## Struktur Direktori & File
-Kode baru harus diletakkan di dalam `src/admin` dengan pembagian struktur:
-- **Routes** (`src/admin/routes/admin-category-routes.ts`): Berisi definisi routing HTTP.
-- **Service** (`src/admin/service/admin-category-service.ts`): Berisi *business logic* untuk operasi kategori.
-
-## Spesifikasi Payload Request & Response
+Berikut adalah detail endpoint API yang akan digunakan:
 
 ### 1. GET `/api/admin/category` (200 Success)
-**Response:**
+Berfungsi untuk mengambil semua data kategori.
+**Response Body:**
 ```json
 {
    "Categorydata": [
@@ -47,6 +29,7 @@ Kode baru harus diletakkan di dalam `src/admin` dengan pembagian struktur:
 ```
 
 ### 2. POST `/api/admin/category` (201 Created)
+Berfungsi untuk membuat data kategori baru.
 **Request Body:**
 ```json
 {
@@ -55,27 +38,37 @@ Kode baru harus diletakkan di dalam `src/admin` dengan pembagian struktur:
     "slug": "string" // Dihasilkan mengikuti "name"
 }
 ```
-
-### 3. PUT `/api/admin/category/{id}` (200 Success)
-**Response:**
+**Response Body:**
 ```json
 {
     "success": true,
-    "message": "data berhasil di update"
+    "message": "data kategori berhasil ditambahkan"
+}
+```
+
+### 3. PUT `/api/admin/category/{id}` (200 Success)
+Berfungsi untuk mengubah/mengedit data kategori yang sudah ada berdasarkan ID.
+**Response Body:**
+```json
+{
+    "success": true,
+    "message": "data kategori berhasil di update"
 }
 ```
 
 ### 4. DELETE `/api/admin/category/{id}` (200 Success)
-**Response:**
+Berfungsi untuk menghapus data kategori berdasarkan ID.
+**Response Body:**
 ```json
 {
     "success": true,
-    "message": "data berhasil dihapus"
+    "message": "data kategori berhasil dihapus"
 }
 ```
 
-### Format Response Error
-**Response (Contoh: 400 Bad Request, 500 Internal Server Error, dll):**
+### 5. Format Response Error
+Respons ini akan muncul jika terjadi masalah seperti gagal ditambahkan, error bad request, atau internal server error tergantung method yang digunakan.
+**Response Body:**
 ```json
 {
     "success": false,
@@ -85,27 +78,42 @@ Kode baru harus diletakkan di dalam `src/admin` dengan pembagian struktur:
 
 ---
 
-## Tahapan Implementasi (Panduan untuk Programmer / Model AI)
-Berikut adalah langkah-langkah detail yang perlu dilakukan tanpa perlu menuliskan kode:
+## Tahapan Implementasi (Panduan untuk Junior Programmer / Model AI)
 
-1. **Analisis Pola yang Sudah Ada:**
-   - Review kembali file route dan service pada fitur `categories` yang sudah ada (bukan admin) untuk memastikan Anda memahami style code, dependensi database, dan cara *error handling* yang berjalan.
+Berikut adalah detail langkah-langkah implementasi yang harus dilakukan pada sisi frontend (tanpa menyentuh kode backend). Pastikan setiap langkah dilakukan berurutan:
 
-2. **Pembuatan File Service (`admin-category-service.ts`):**
-   - Buat fungsi untuk **GET**: Tarik data dari tabel kategori dengan memastikan seluruh field seperti `id`, `name`, `image`, `slug`, `created_at`, `updated_at`, dan `deleted_at` ikut di-query.
-   - Buat fungsi untuk **POST**: Siapkan fungsi insert data baru yang menerima `name`, `image`, dan `slug`. Atur logika untuk memanipulasi string `name` menjadi format *URL-friendly* untuk diisi ke `slug` jika tidak tersedia.
-   - Buat fungsi untuk **PUT**: Siapkan fungsi update berdasarkan `id`.
-   - Buat fungsi untuk **DELETE**: Siapkan fungsi delete berdasarkan `id` (bisa *hard delete* atau *soft delete* menyesuaikan pola aplikasi menggunakan kolom `deleted_at`).
+### 1. Persiapan Fungsi Service (Fetch API)
+- Buat kumpulan fungsi khusus di dalam folder service/API di sisi frontend yang bertugas menangani koneksi ke masing-masing endpoint `/api/admin/category`.
+- Buat 4 fungsi terpisah:
+  - **Fungsi GET:** Memanggil endpoint GET dan mengembalikan `Categorydata`.
+  - **Fungsi POST:** Menerima argumen berupa data form, memanggil endpoint POST, mengirim body request, dan mengembalikan status/pesan.
+  - **Fungsi PUT:** Menerima argumen ID dan data form, memanggil endpoint PUT.
+  - **Fungsi DELETE:** Menerima argumen ID, memanggil endpoint DELETE.
+- Pastikan di setiap fungsi terdapat mekanisme penanganan error (*try/catch*) yang akan menangkap pesan error jika *request* gagal (misalnya format data salah atau server error).
 
-3. **Pembuatan File Routes (`admin-category-routes.ts`):**
-   - Import service yang telah dibuat dan tentukan method-method rute (`router.get`, `router.post`, `router.put`, `router.delete`).
-   - Ekstrak *request body* atau param ID dari rute lalu masukkan ke dalam argumen *service handler*.
-   - Standarkan blok *Try/Catch* pada setiap rute. Jika berhasil (200/201), kembalikan response objek sesuai spesifikasi.
-   - Jika gagal, tangkap *exception* dan kembalikan response format error dengan status HTTP yang sesuai (400 atau 500) dan `"success": false`.
+### 2. Implementasi Halaman Daftar Kategori (Admin Category Page)
+- Di dalam halaman yang menampilkan daftar kategori, siapkan *state* (penyimpanan data sementara di komponen UI) untuk menampung data array `Categorydata`.
+- Saat halaman/komponen pertama kali dimuat (*on mount*), panggil fungsi GET API yang sudah dibuat di langkah pertama.
+- Setelah data berhasil didapat dari respons GET API, masukkan data tersebut ke dalam *state* sehingga UI dapat langsung me-render (menampilkan) daftarnya dalam bentuk tabel atau list.
+- Siapkan juga *state* untuk penanda *loading* agar ada indikator proses saat sedang menarik data dari API.
 
-4. **Integrasi Router ke Aplikasi Utama:**
-   - Setelah route didefinisikan secara independen, jangan lupa menyambungkannya/meng-import file `admin-category-routes.ts` ke dalam index/main router aplikasi (`src/app.ts` atau `src/routes/index.ts`) dengan prefix `/api/admin/category`.
+### 3. Implementasi Hapus Kategori
+- Pada tabel daftar kategori yang ada di langkah 2, pastikan ada tombol atau aksi "Hapus/Delete" di tiap baris data.
+- Hubungkan tombol hapus tersebut dengan fungsi DELETE API.
+- Saat ditekan, ambil `id` dari data baris tersebut dan lempar ke fungsi DELETE.
+- Jika API merespons dengan status sukses (menerima pesan berhasil dihapus), panggil ulang fungsi GET API untuk memperbarui daftar data di tabel atau hilangkan langsung data tersebut dari *state* tabel.
 
-5. **Pengujian Mandiri:**
-   - Lakukan pemeriksaan aliran data (uji GET, lalu POST data baru, lalu uji GET lagi untuk verifikasi masuk, kemudian PUT edit data, dan terakhir DELETE).
-   - Validasi response *success* maupun format *error* sesuai format JSON yang didefinisikan.
+### 4. Implementasi Halaman/Modal Form Kategori (Create & Update)
+- Siapkan *state* pada form admin category untuk menampung field input: `name`, `image`, dan `slug`.
+- **Logika Slug Otomatis:** Buat mekanisme di frontend agar field `slug` terisi otomatis secara real-time mengikuti teks yang diketik di field `name` (ubah menjadi huruf kecil dan ganti spasi dengan tanda hubung `-`).
+- **Mode Tambah Data (Create):** Saat tombol *submit* ditekan untuk menambah data baru, kumpulkan data di form (*name, image, slug*) lalu kirim menggunakan fungsi POST API.
+- **Mode Edit Data (Update):** Jika form digunakan untuk mode edit (berarti form sudah terisi data bawaan yang ditarik sebelumnya), gunakan tombol *submit* untuk mengirim ID beserta data terbaru menggunakan fungsi PUT API.
+- Tampilkan notifikasi (misal *toast*, *snackbar*, atau *alert*) berdasarkan respons `message` dari backend (berhasil atau gagal).
+- Setelah operasi POST atau PUT sukses, tutup form/modal (jika berbasis modal) dan pastikan untuk me-refresh/me-load ulang tabel data di halaman admin kategori agar perubahan langsung terlihat.
+
+### 5. Review dan Testing
+- Lakukan pengujian secara keseluruhan.
+- Uji menambahkan kategori baru dengan mengisi seluruh data, dan pastikan notifikasi "data kategori berhasil ditambahkan" muncul.
+- Periksa apakah tabel data langsung terbarui dengan data baru tersebut.
+- Uji mengubah data tersebut dan uji proses hapus.
+- Pastikan bila backend mengirim `success: false` karena *bad request* atau *server error*, notifikasi error yang wajar muncul di layar pengguna dan UI tidak rusak (*crash*).
