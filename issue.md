@@ -1,119 +1,213 @@
-# Perencanaan Implementasi Fetch API Kategori pada Halaman Admin
+# Perencanaan Implementasi API Admin Products
 
-## Tujuan
-Mengimplementasikan integrasi dari sisi frontend untuk halaman admin category dan form admin agar dapat melakukan operasi CRUD (Create, Read, Update, Delete) menggunakan API `/api/admin/category` yang sudah dibuat dan tersedia di backend.
+Dokumen ini berisi panduan dan tahapan detail untuk mengimplementasikan fitur CRUD Products pada halaman admin. Panduan ini dirancang untuk diimplementasikan langkah demi langkah oleh junior programmer atau AI model asisten.
 
----
+## 1. Spesifikasi Database
+Tabel `products` memiliki struktur sebagai berikut:
 
-## Spesifikasi API yang Tersedia
+| Field         | Type         | Null | Key | Default | Extra |
+|---------------|--------------|------|-----|---------|-------|
+| id            | char(36)     | NO   | PRI | NULL    |       |
+| categories_id | char(36)     | YES  | MUL | NULL    |       |
+| name          | varchar(255) | NO   |     | NULL    |       |
+| image         | varchar(255) | YES  |     | NULL    |       |
+| price         | int unsigned | NO   |     | 0       |       |
+| capital_price | int unsigned | NO   |     | 0       |       |
+| description   | text         | NO   |     | NULL    |       |
+| weight        | int unsigned | NO   |     | NULL    |       |
+| stock_amount  | int unsigned | NO   |     | NULL    |       |
+| minimum_order | int unsigned | NO   |     | NULL    |       |
+| slug          | varchar(255) | NO   |     | NULL    |       |
+| deleted_at    | timestamp    | YES  |     | NULL    |       |
+| created_at    | timestamp    | YES  |     | NULL    |       |
+| updated_at    | timestamp    | YES  |     | NULL    |       |
 
-Berikut adalah detail endpoint API yang akan digunakan:
+## 2. Spesifikasi Endpoint
+Base Endpoint: `/api/admin/products`
 
-### 1. GET `/api/admin/category` (200 Success)
-Berfungsi untuk mengambil semua data kategori.
-**Response Body:**
+- `GET /api/admin/products` (Mengambil daftar data produk)
+- `POST /api/admin/products` (Menambah data produk baru)
+- `PUT /api/admin/products/{id}` (Mengubah data produk berdasarkan ID)
+- `DELETE /api/admin/products/{id}` (Menghapus data produk berdasarkan ID)
+
+## 3. Struktur Direktori dan File
+Implementasi ini harus diletakkan pada struktur folder `src/admin` dengan format berikut:
+- **Routes:** `src/admin/routes/admin-product-routes.ts`
+- **Service:** `src/admin/service/admin-product-service.ts`
+
+*(Catatan: Sesuaikan ekstensi file dengan backend yang digunakan. Proyek backend sebelumnya terlihat menggunakan Golang (`.go`), namun penamaan file tetap mengikuti format yang sudah didefinisikan)*
+
+## 4. Spesifikasi Response API
+
+### Response GET (Success 200)
 ```json
 {
-   "Categorydata": [
+   "success": true,
+   "message": "data berhasil ditemukan",
+   "Productdata": [
         {
             "id": "string",
+            "categories_id": "string",
             "name": "string",
             "image": "string",
+            "price": 10000,
+            "capital_price": 5000,
+            "description": "string",
+            "weight": 100,
+            "stock_amount": 10,
+            "minimum_order": 1,
             "slug": "string",
-            "deleted_at": "timestamp | null",
-            "created_at": "timestamp",
-            "updated_at": "timestamp"
+            "deleted_at": null,
+            "created_at": "2024-05-01 10:00:00",
+            "updated_at": "2024-05-01 10:00:00"
         }
    ]
 }
 ```
 
-### 2. POST `/api/admin/category` (201 Created)
-Berfungsi untuk membuat data kategori baru.
+### Response POST (Success 201)
 **Request Body:**
 ```json
 {
+    "categories_id": "string",
     "name": "string",
     "image": "string",
-    "slug": "string" // Dihasilkan mengikuti "name"
+    "price": 10000,
+    "capital_price": 5000,
+    "description": "string",
+    "weight": 100,
+    "stock_amount": 10,
+    "minimum_order": 1,
+    "slug": "string"
 }
 ```
 **Response Body:**
 ```json
 {
     "success": true,
-    "message": "data kategori berhasil ditambahkan"
+    "message": "data product berhasil ditambahkan",
+    "Productdata": [
+        {
+            "id": "string",
+            "categories_id": "string",
+            "name": "string",
+            "image": "string",
+            "price": 10000,
+            "capital_price": 5000,
+            "description": "string",
+            "weight": 100,
+            "stock_amount": 10,
+            "minimum_order": 1,
+            "slug": "string",
+            "deleted_at": null,
+            "created_at": "2024-05-01 10:00:00",
+            "updated_at": "2024-05-01 10:00:00"
+        }
+   ]
 }
 ```
 
-### 3. PUT `/api/admin/category/{id}` (200 Success)
-Berfungsi untuk mengubah/mengedit data kategori yang sudah ada berdasarkan ID.
+### Response PUT/Update (Success 200)
+**Request Body:** Sama seperti Request Body pada fungsi POST di atas.
 **Response Body:**
 ```json
 {
     "success": true,
-    "message": "data kategori berhasil di update"
+    "message": "data product berhasil di update",
+    "Productdata": [
+        {
+            "id": "string",
+            "categories_id": "string",
+            "name": "string",
+            "image": "string",
+            "price": 10000,
+            "capital_price": 5000,
+            "description": "string",
+            "weight": 100,
+            "stock_amount": 10,
+            "minimum_order": 1,
+            "slug": "string",
+            "deleted_at": null,
+            "created_at": "2024-05-01 10:00:00",
+            "updated_at": "2024-05-01 10:00:00"
+        }
+   ]
 }
 ```
 
-### 4. DELETE `/api/admin/category/{id}` (200 Success)
-Berfungsi untuk menghapus data kategori berdasarkan ID.
-**Response Body:**
+### Response DELETE (Success 200)
 ```json
 {
     "success": true,
-    "message": "data kategori berhasil dihapus"
+    "message": "data product berhasil dihapus",
+    "Productdata": [
+        {
+            "id": "string"
+        }
+   ]
 }
 ```
 
-### 5. Format Response Error
-Respons ini akan muncul jika terjadi masalah seperti gagal ditambahkan, error bad request, atau internal server error tergantung method yang digunakan.
-**Response Body:**
+### Response Error (Contoh 400/500)
 ```json
 {
     "success": false,
-    "message": "error (bisa kategori gagal ditambahkan, error bad request, atau internal server error tergantung method yang digunakan)"
+    "message": "error (pesan disesuaikan, misalnya data tidak lengkap, gagal ditambahkan, bad request, atau internal server error tergantung case-nya)"
 }
 ```
+*(Catatan: Format response error ini sesuaikan penerapannya persis seperti pada kode admin categories yang sudah ada saat ini).*
 
 ---
 
-## Tahapan Implementasi (Panduan untuk Junior Programmer / Model AI)
+## 5. Tahapan Implementasi
 
-Berikut adalah detail langkah-langkah implementasi yang harus dilakukan pada sisi frontend (tanpa menyentuh kode backend). Pastikan setiap langkah dilakukan berurutan:
+Untuk junior programmer atau AI yang akan mengeksekusi instruksi ini, kerjakan langkah-langkah berikut secara berurutan dan jangan lompati satupun:
 
-### 1. Persiapan Fungsi Service (Fetch API)
-- Buat kumpulan fungsi khusus di dalam folder service/API di sisi frontend yang bertugas menangani koneksi ke masing-masing endpoint `/api/admin/category`.
-- Buat 4 fungsi terpisah:
-  - **Fungsi GET:** Memanggil endpoint GET dan mengembalikan `Categorydata`.
-  - **Fungsi POST:** Menerima argumen berupa data form, memanggil endpoint POST, mengirim body request, dan mengembalikan status/pesan.
-  - **Fungsi PUT:** Menerima argumen ID dan data form, memanggil endpoint PUT.
-  - **Fungsi DELETE:** Menerima argumen ID, memanggil endpoint DELETE.
-- Pastikan di setiap fungsi terdapat mekanisme penanganan error (*try/catch*) yang akan menangkap pesan error jika *request* gagal (misalnya format data salah atau server error).
+### Tahap 1: Persiapan Representasi Data / Model
+1. Pelajari skema database di atas dan siapkan tipe data / struktur obyek (seperti Struct/Interface/Class) yang mewakili entitas `Product`.
+2. Buat struktur/dto untuk `RequestBody` khusus menampung field dari request `POST/PUT`.
+3. Buat wrapper response sesuai dengan format JSON di atas (`{ success, message, Productdata }`).
 
-### 2. Implementasi Halaman Daftar Kategori (Admin Category Page)
-- Di dalam halaman yang menampilkan daftar kategori, siapkan *state* (penyimpanan data sementara di komponen UI) untuk menampung data array `Categorydata`.
-- Saat halaman/komponen pertama kali dimuat (*on mount*), panggil fungsi GET API yang sudah dibuat di langkah pertama.
-- Setelah data berhasil didapat dari respons GET API, masukkan data tersebut ke dalam *state* sehingga UI dapat langsung me-render (menampilkan) daftarnya dalam bentuk tabel atau list.
-- Siapkan juga *state* untuk penanda *loading* agar ada indikator proses saat sedang menarik data dari API.
+### Tahap 2: Implementasi Business Logic (`admin-product-service`)
+Buat file `admin-product-service` dan siapkan empat fungsi utama yang berisi logika interaksi dengan database:
+1. **Fungsi Get Products**: 
+   - Lakukan query ke database tabel `products`. 
+   - Kumpulkan dan retun array data dari tabel.
+2. **Fungsi Create Product**: 
+   - Ekstrak data dari input body.
+   - Hasilkan `id` unik berupa karakter UUID 36-char.
+   - Tentukan nilai kolom `created_at` dan `updated_at`.
+   - Simpan (`INSERT`) object ke tabel.
+   - Return data produk yang baru ditambahkan.
+3. **Fungsi Update Product**: 
+   - Pastikan ID produk tersedia/valid di database.
+   - Update field dari tabel (`name`, `price`, dll) menggunakan data yang diterima.
+   - Set `updated_at` dengan timestamp saat ini.
+   - Simpan perubahan (`UPDATE`) dan kembalikan data terbaru.
+4. **Fungsi Delete Product**: 
+   - Lakukan pencarian berdasar ID untuk memvalidasi keberadaan produk.
+   - Tergantung arsitektur yang digunakan, lakukan update field `deleted_at` dengan timestamp (Soft Delete) atau hapus langsung (Hard Delete).
+   - Return ID dari produk yang sukses dihapus.
 
-### 3. Implementasi Hapus Kategori
-- Pada tabel daftar kategori yang ada di langkah 2, pastikan ada tombol atau aksi "Hapus/Delete" di tiap baris data.
-- Hubungkan tombol hapus tersebut dengan fungsi DELETE API.
-- Saat ditekan, ambil `id` dari data baris tersebut dan lempar ke fungsi DELETE.
-- Jika API merespons dengan status sukses (menerima pesan berhasil dihapus), panggil ulang fungsi GET API untuk memperbarui daftar data di tabel atau hilangkan langsung data tersebut dari *state* tabel.
+### Tahap 3: Implementasi Controller / Handler
+1. Buat kode untuk menangkap request HTTP di masing-masing endpoint.
+2. Lakukan validasi data request. Jika error, langsung return response error dengan `success: false`.
+3. Panggil metode yang sesuai pada `admin-product-service`.
+4. Ambil return dari service, lalu format JSON Response tepat menyesuaikan dengan struktur kunci yang diminta (perhatikan keys seperti `"Productdata"` dengan huruf kapital pada "P").
 
-### 4. Implementasi Halaman/Modal Form Kategori (Create & Update)
-- Siapkan *state* pada form admin category untuk menampung field input: `name`, `image`, dan `slug`.
-- **Logika Slug Otomatis:** Buat mekanisme di frontend agar field `slug` terisi otomatis secara real-time mengikuti teks yang diketik di field `name` (ubah menjadi huruf kecil dan ganti spasi dengan tanda hubung `-`).
-- **Mode Tambah Data (Create):** Saat tombol *submit* ditekan untuk menambah data baru, kumpulkan data di form (*name, image, slug*) lalu kirim menggunakan fungsi POST API.
-- **Mode Edit Data (Update):** Jika form digunakan untuk mode edit (berarti form sudah terisi data bawaan yang ditarik sebelumnya), gunakan tombol *submit* untuk mengirim ID beserta data terbaru menggunakan fungsi PUT API.
-- Tampilkan notifikasi (misal *toast*, *snackbar*, atau *alert*) berdasarkan respons `message` dari backend (berhasil atau gagal).
-- Setelah operasi POST atau PUT sukses, tutup form/modal (jika berbasis modal) dan pastikan untuk me-refresh/me-load ulang tabel data di halaman admin kategori agar perubahan langsung terlihat.
+### Tahap 4: Implementasi Routing (`admin-product-routes`)
+1. Buka (atau buat) file route `admin-product-routes`.
+2. Daftarkan URL: 
+   - `GET /api/admin/products`
+   - `POST /api/admin/products`
+   - `PUT /api/admin/products/{id}`
+   - `DELETE /api/admin/products/{id}`
+3. Sambungkan/mapping masing-masing rute HTTP ke controller yang sudah dibuat pada *Tahap 3*.
+4. Pasang (register) route grup ini agar terbaca oleh router utama aplikasi.
 
-### 5. Review dan Testing
-- Lakukan pengujian secara keseluruhan.
-- Uji menambahkan kategori baru dengan mengisi seluruh data, dan pastikan notifikasi "data kategori berhasil ditambahkan" muncul.
-- Periksa apakah tabel data langsung terbarui dengan data baru tersebut.
-- Uji mengubah data tersebut dan uji proses hapus.
-- Pastikan bila backend mengirim `success: false` karena *bad request* atau *server error*, notifikasi error yang wajar muncul di layar pengguna dan UI tidak rusak (*crash*).
+### Tahap 5: Finalisasi & Pengujian
+1. Pastikan seluruh logic mengikuti pattern/gaya kode yang identik dengan implementasi `categories` admin yang sudah ada.
+2. Lakukan uji coba `POST`, cek apakah return object utuh.
+3. Lakukan uji coba `GET`, cek apakah list array kembali utuh.
+4. Lakukan `PUT` lalu verifikasi jika hanya data yang dituju yang terupdate.
+5. Terakhir, jalankan uji coba format error agar memastikan JSON handling menangkap kasus data tidak valid dengan properti `{ "success": false }`.
