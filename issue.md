@@ -1,45 +1,16 @@
-# Perencanaan Implementasi API Admin Products
+# Implementasi API Admin Products dan Integrasi Frontend
 
-Dokumen ini berisi panduan dan tahapan detail untuk mengimplementasikan fitur CRUD Products pada halaman admin. Panduan ini dirancang untuk diimplementasikan langkah demi langkah oleh junior programmer atau AI model asisten.
+**Tujuan:**
+Mengimplementasikan API CRUD untuk entitas `Product` pada sisi admin dan memastikan halaman beserta form admin dapat terintegrasi dengan API tersebut.
 
-## 1. Spesifikasi Database
-Tabel `products` memiliki struktur sebagai berikut:
+## 1. Spesifikasi API
 
-| Field         | Type         | Null | Key | Default | Extra |
-|---------------|--------------|------|-----|---------|-------|
-| id            | char(36)     | NO   | PRI | NULL    |       |
-| categories_id | char(36)     | YES  | MUL | NULL    |       |
-| name          | varchar(255) | NO   |     | NULL    |       |
-| image         | varchar(255) | YES  |     | NULL    |       |
-| price         | int unsigned | NO   |     | 0       |       |
-| capital_price | int unsigned | NO   |     | 0       |       |
-| description   | text         | NO   |     | NULL    |       |
-| weight        | int unsigned | NO   |     | NULL    |       |
-| stock_amount  | int unsigned | NO   |     | NULL    |       |
-| minimum_order | int unsigned | NO   |     | NULL    |       |
-| slug          | varchar(255) | NO   |     | NULL    |       |
-| deleted_at    | timestamp    | YES  |     | NULL    |       |
-| created_at    | timestamp    | YES  |     | NULL    |       |
-| updated_at    | timestamp    | YES  |     | NULL    |       |
+Berikut adalah kontrak API yang perlu diimplementasikan di backend dan dikonsumsi oleh frontend:
 
-## 2. Spesifikasi Endpoint
-Base Endpoint: `/api/admin/products`
+### 1.1 GET `/api/admin/products`
+Digunakan untuk mengambil semua daftar produk pada halaman admin.
 
-- `GET /api/admin/products` (Mengambil daftar data produk)
-- `POST /api/admin/products` (Menambah data produk baru)
-- `PUT /api/admin/products/{id}` (Mengubah data produk berdasarkan ID)
-- `DELETE /api/admin/products/{id}` (Menghapus data produk berdasarkan ID)
-
-## 3. Struktur Direktori dan File
-Implementasi ini harus diletakkan pada struktur folder `src/admin` dengan format berikut:
-- **Routes:** `src/admin/routes/admin-product-routes.ts`
-- **Service:** `src/admin/service/admin-product-service.ts`
-
-*(Catatan: Sesuaikan ekstensi file dengan backend yang digunakan. Proyek backend sebelumnya terlihat menggunakan Golang (`.go`), namun penamaan file tetap mengikuti format yang sudah didefinisikan)*
-
-## 4. Spesifikasi Response API
-
-### Response GET (Success 200)
+**Response (200 Success):**
 ```json
 {
    "success": true,
@@ -48,6 +19,7 @@ Implementasi ini harus diletakkan pada struktur folder `src/admin` dengan format
         {
             "id": "string",
             "categories_id": "string",
+            "category_name": "string",
             "name": "string",
             "image": "string",
             "price": 10000,
@@ -65,7 +37,9 @@ Implementasi ini harus diletakkan pada struktur folder `src/admin` dengan format
 }
 ```
 
-### Response POST (Success 201)
+### 1.2 POST `/api/admin/products`
+Digunakan untuk menambahkan produk baru melalui form admin.
+
 **Request Body:**
 ```json
 {
@@ -81,7 +55,8 @@ Implementasi ini harus diletakkan pada struktur folder `src/admin` dengan format
     "slug": "string"
 }
 ```
-**Response Body:**
+
+**Response (201 Created):**
 ```json
 {
     "success": true,
@@ -90,6 +65,7 @@ Implementasi ini harus diletakkan pada struktur folder `src/admin` dengan format
         {
             "id": "string",
             "categories_id": "string",
+            "category_name": "string",
             "name": "string",
             "image": "string",
             "price": 10000,
@@ -107,9 +83,10 @@ Implementasi ini harus diletakkan pada struktur folder `src/admin` dengan format
 }
 ```
 
-### Response PUT/Update (Success 200)
-**Request Body:** Sama seperti Request Body pada fungsi POST di atas.
-**Response Body:**
+### 1.3 PUT `/api/admin/products/{id}`
+Digunakan untuk mengupdate data produk yang ada melalui form admin.
+
+**Response (200 Success):**
 ```json
 {
     "success": true,
@@ -118,6 +95,7 @@ Implementasi ini harus diletakkan pada struktur folder `src/admin` dengan format
         {
             "id": "string",
             "categories_id": "string",
+            "category_name": "string",
             "name": "string",
             "image": "string",
             "price": 10000,
@@ -135,79 +113,38 @@ Implementasi ini harus diletakkan pada struktur folder `src/admin` dengan format
 }
 ```
 
-### Response DELETE (Success 200)
+### 1.4 DELETE `/api/admin/products/{id}`
+Digunakan untuk menghapus produk dari halaman admin.
+
+**Response (200 Success):**
 ```json
 {
     "success": true,
-    "message": "data product berhasil dihapus",
-    "Productdata": [
-        {
-            "id": "string"
-        }
-   ]
+    "message": "data product berhasil dihapus"
 }
 ```
 
-### Response Error (Contoh 400/500)
+### 1.5 Error Response (Format Umum)
+Jika terjadi error (misalnya validasi gagal, ID tidak ditemukan, internal server error).
+
+**Response (4xx / 5xx):**
 ```json
 {
     "success": false,
-    "message": "error (pesan disesuaikan, misalnya data tidak lengkap, gagal ditambahkan, bad request, atau internal server error tergantung case-nya)"
+    "message": "pesan error disesuaikan (misal: data tidak lengkap, gagal ditambahkan, bad request, atau internal server error tergantung case-nya)"
 }
 ```
-*(Catatan: Format response error ini sesuaikan penerapannya persis seperti pada kode admin categories yang sudah ada saat ini).*
 
----
+## 2. Instruksi Implementasi
 
-## 5. Tahapan Implementasi
+### Bagian Backend (Go)
+1. **Routing:** Pastikan endpoint `GET`, `POST`, `PUT`, dan `DELETE` untuk `/api/admin/products` sudah terdaftar di `routes.go` di dalam group route admin.
+2. **Controller (`admin-product-controller.go`):** Implementasikan handler untuk masing-masing endpoint dengan memastikan struktur response JSON sesuai dengan spesifikasi (mengandung `success`, `message`, dan `Productdata`).
+3. **Service & Repository:** Pastikan logika untuk mengambil `category_name` melalui relasi/join database telah diimplementasikan agar format kembalian sesuai dengan object JSON di atas.
 
-Untuk junior programmer atau AI yang akan mengeksekusi instruksi ini, kerjakan langkah-langkah berikut secara berurutan dan jangan lompati satupun:
-
-### Tahap 1: Persiapan Representasi Data / Model
-1. Pelajari skema database di atas dan siapkan tipe data / struktur obyek (seperti Struct/Interface/Class) yang mewakili entitas `Product`.
-2. Buat struktur/dto untuk `RequestBody` khusus menampung field dari request `POST/PUT`.
-3. Buat wrapper response sesuai dengan format JSON di atas (`{ success, message, Productdata }`).
-
-### Tahap 2: Implementasi Business Logic (`admin-product-service`)
-Buat file `admin-product-service` dan siapkan empat fungsi utama yang berisi logika interaksi dengan database:
-1. **Fungsi Get Products**: 
-   - Lakukan query ke database tabel `products`. 
-   - Kumpulkan dan retun array data dari tabel.
-2. **Fungsi Create Product**: 
-   - Ekstrak data dari input body.
-   - Hasilkan `id` unik berupa karakter UUID 36-char.
-   - Tentukan nilai kolom `created_at` dan `updated_at`.
-   - Simpan (`INSERT`) object ke tabel.
-   - Return data produk yang baru ditambahkan.
-3. **Fungsi Update Product**: 
-   - Pastikan ID produk tersedia/valid di database.
-   - Update field dari tabel (`name`, `price`, dll) menggunakan data yang diterima.
-   - Set `updated_at` dengan timestamp saat ini.
-   - Simpan perubahan (`UPDATE`) dan kembalikan data terbaru.
-4. **Fungsi Delete Product**: 
-   - Lakukan pencarian berdasar ID untuk memvalidasi keberadaan produk.
-   - Tergantung arsitektur yang digunakan, lakukan update field `deleted_at` dengan timestamp (Soft Delete) atau hapus langsung (Hard Delete).
-   - Return ID dari produk yang sukses dihapus.
-
-### Tahap 3: Implementasi Controller / Handler
-1. Buat kode untuk menangkap request HTTP di masing-masing endpoint.
-2. Lakukan validasi data request. Jika error, langsung return response error dengan `success: false`.
-3. Panggil metode yang sesuai pada `admin-product-service`.
-4. Ambil return dari service, lalu format JSON Response tepat menyesuaikan dengan struktur kunci yang diminta (perhatikan keys seperti `"Productdata"` dengan huruf kapital pada "P").
-
-### Tahap 4: Implementasi Routing (`admin-product-routes`)
-1. Buka (atau buat) file route `admin-product-routes`.
-2. Daftarkan URL: 
-   - `GET /api/admin/products`
-   - `POST /api/admin/products`
-   - `PUT /api/admin/products/{id}`
-   - `DELETE /api/admin/products/{id}`
-3. Sambungkan/mapping masing-masing rute HTTP ke controller yang sudah dibuat pada *Tahap 3*.
-4. Pasang (register) route grup ini agar terbaca oleh router utama aplikasi.
-
-### Tahap 5: Finalisasi & Pengujian
-1. Pastikan seluruh logic mengikuti pattern/gaya kode yang identik dengan implementasi `categories` admin yang sudah ada.
-2. Lakukan uji coba `POST`, cek apakah return object utuh.
-3. Lakukan uji coba `GET`, cek apakah list array kembali utuh.
-4. Lakukan `PUT` lalu verifikasi jika hanya data yang dituju yang terupdate.
-5. Terakhir, jalankan uji coba format error agar memastikan JSON handling menangkap kasus data tidak valid dengan properti `{ "success": false }`.
+### Bagian Frontend (Admin UI)
+1. **Daftar Produk (Table):** Fetch data dari endpoint `GET /api/admin/products` dan render list `Productdata` ke dalam tabel di halaman admin produk.
+2. **Form Tambah Produk:** Sesuaikan payload data form dengan format Request Body `POST`. Hit endpoint POST saat form disubmit.
+3. **Form Edit Produk:** Ambil ID produk yang ingin diubah, isi form dengan data eksisting, dan submit ke endpoint `PUT /api/admin/products/{id}`.
+4. **Hapus Produk:** Hubungkan tombol delete/hapus ke endpoint `DELETE /api/admin/products/{id}`.
+5. **Feedback & Refresh Data:** Tampilkan notifikasi berdasarkan pesan `message` dari response backend (baik ketika success maupun error) dan jangan lupa refresh/fetch ulang daftar produk setiap kali operasi POST, PUT, atau DELETE berhasil dilakukan.
