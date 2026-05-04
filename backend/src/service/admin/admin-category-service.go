@@ -9,41 +9,43 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAllCategoriesAdmin() ([]model.Category, error) {
+func GetAllCategoriesAdmin() ([]model.CategoryAdmin, error) {
 	return repository.GetAllCategories()
 }
 
-func GetCategoryByID(id string) (model.Category, error) {
+func GetCategoryByID(id string) (model.CategoryAdmin, error) {
 	return repository.GetCategoryByID(id)
 }
 
-func CreateCategory(name, image, slug string) (model.Category, error) {
+func CreateCategory(name, image, slug string) (model.CategoryAdmin, error) {
 	if name == "" {
-		return model.Category{}, errors.New("nama kategori tidak boleh kosong")
+		return model.CategoryAdmin{}, errors.New("nama kategori tidak boleh kosong")
 	}
 
 	if slug == "" {
 		slug = strings.ToLower(strings.ReplaceAll(name, " ", "-"))
 	}
 
-	category := model.Category{
-		ID:    uuid.New().String(),
-		Name:  name,
-		Image: image,
-		Slug:  slug,
+	category := model.CategoryAdmin{
+		Category: model.Category{
+			ID:    uuid.New().String(),
+			Name:  name,
+			Image: image,
+			Slug:  slug,
+		},
 	}
 
 	if err := repository.CreateCategory(category); err != nil {
-		return model.Category{}, err
+		return model.CategoryAdmin{}, err
 	}
 
 	return category, nil
 }
 
-func UpdateCategory(id, name, image, slug string) (model.Category, error) {
+func UpdateCategory(id, name, image, slug string) (model.CategoryAdmin, error) {
 	category, err := repository.GetCategoryByID(id)
 	if err != nil {
-		return model.Category{}, errors.New("kategori tidak ditemukan")
+		return model.CategoryAdmin{}, errors.New("kategori tidak ditemukan")
 	}
 
 	if name != "" {
@@ -62,7 +64,7 @@ func UpdateCategory(id, name, image, slug string) (model.Category, error) {
 	}
 
 	if err := repository.UpdateCategory(category); err != nil {
-		return model.Category{}, err
+		return model.CategoryAdmin{}, err
 	}
 
 	return category, nil

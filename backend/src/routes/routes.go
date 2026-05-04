@@ -12,16 +12,18 @@ func SetupRoutes(app *fiber.App) {
 
 	api.Get("/banners", controller.GetBanners)
 	api.Get("/categories", controller.GetCategories)
-	api.Get("/categories/:id", controller.GetCategoryByID)
 	api.Get("/products", controller.GetProducts)
-	api.Get("/products/:id", controller.GetProductByID)
 	api.Post("/register", controller.Register)
 	api.Post("/login", controller.Login)
 
 	admin := api.Group("/admin")
 	admin.Get("/categories", admin_controller.GetCategoriesAdmin)
-	admin.Get("/categories/:id", admin_controller.GetCategoryByID)
 	admin.Post("/categories", admin_controller.CreateCategory)
-	admin.Put("/categories/:id", admin_controller.UpdateCategory)
-	admin.Delete("/categories/:id", admin_controller.DeleteCategory)
+	admin.Put("/categories", admin_controller.UpdateCategory)
+	admin.Delete("/categories", admin_controller.DeleteCategory)
+
+	admin.Get("/products", admin_controller.GetProductsAdmin)
+	admin.Post("/products", admin_controller.CreateProduct)
+	admin.Put("/products", admin_controller.UpdateProduct)
+	admin.Delete("/products", admin_controller.DeleteProduct)
 }

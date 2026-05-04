@@ -7,6 +7,34 @@ import (
 )
 
 func GetProducts(c *fiber.Ctx) error {
+	id := c.Query("id")
+
+	if id != "" {
+		product, err := service.GetProductByID(id)
+		if err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(struct {
+				Success     bool        `json:"success"`
+				Message     string      `json:"message"`
+				Productdata interface{} `json:"Productdata"`
+			}{
+				Success:     false,
+				Message:     "data tidak ditemukan",
+				Productdata: fiber.Map{},
+			})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(struct {
+			Success     bool        `json:"success"`
+			Message     string      `json:"message"`
+			Productdata interface{} `json:"Productdata"`
+		}{
+			Success:     true,
+			Message:     "data berhasil ditemukan",
+			Productdata: product,
+		})
+	}
+
+	// Jika tidak ada ID, tampilkan semua
 	products, err := service.GetAllProducts()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(struct {
@@ -38,31 +66,5 @@ func GetProducts(c *fiber.Ctx) error {
 		Success:     true,
 		Message:     "data berhasil ditemukan",
 		Productdata: products,
-	})
-}
-
-func GetProductByID(c *fiber.Ctx) error {
-	id := c.Params("id")
-	product, err := service.GetProductByID(id)
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(struct {
-			Success     bool        `json:"success"`
-			Message     string      `json:"message"`
-			Productdata interface{} `json:"Productdata"`
-		}{
-			Success:     false,
-			Message:     "data tidak ditemukan",
-			Productdata: fiber.Map{},
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(struct {
-		Success     bool        `json:"success"`
-		Message     string      `json:"message"`
-		Productdata interface{} `json:"Productdata"`
-	}{
-		Success:     true,
-		Message:     "data berhasil ditemukan",
-		Productdata: product,
 	})
 }

@@ -2,6 +2,7 @@ package admin_controller
 
 import (
 	"fmt"
+	"marketplace-backend/src/model"
 	admin_service "marketplace-backend/src/service/admin"
 	"path/filepath"
 	"time"
@@ -10,6 +11,33 @@ import (
 )
 
 func GetCategoriesAdmin(c *fiber.Ctx) error {
+	id := c.Query("id")
+
+	if id != "" {
+		category, err := admin_service.GetCategoryByID(id)
+		if err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(struct {
+				Success      bool        `json:"success"`
+				Message      string      `json:"message"`
+				Categorydata interface{} `json:"Categorydata"`
+			}{
+				Success:      false,
+				Message:      "data tidak ditemukan",
+				Categorydata: fiber.Map{},
+			})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(struct {
+			Success      bool        `json:"success"`
+			Message      string      `json:"message"`
+			Categorydata interface{} `json:"Categorydata"`
+		}{
+			Success:      true,
+			Message:      "data berhasil ditemukan",
+			Categorydata: []model.CategoryAdmin{category},
+		})
+	}
+
 	categories, err := admin_service.GetAllCategoriesAdmin()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(struct {
@@ -44,36 +72,9 @@ func GetCategoriesAdmin(c *fiber.Ctx) error {
 	})
 }
 
-func GetCategoryByID(c *fiber.Ctx) error {
-	id := c.Params("id")
-	category, err := admin_service.GetCategoryByID(id)
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(struct {
-			Success      bool        `json:"success"`
-			Message      string      `json:"message"`
-			Categorydata interface{} `json:"Categorydata"`
-		}{
-			Success:      false,
-			Message:      "data tidak ditemukan",
-			Categorydata: fiber.Map{},
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(struct {
-		Success      bool        `json:"success"`
-		Message      string      `json:"message"`
-		Categorydata interface{} `json:"Categorydata"`
-	}{
-		Success:      true,
-		Message:      "data berhasil ditemukan",
-		Categorydata: category,
-	})
-}
-
 func CreateCategory(c *fiber.Ctx) error {
 	var name, slug string
 
-	// Handle JSON body
 	var body struct {
 		Name string `json:"name"`
 		Slug string `json:"slug"`
@@ -83,7 +84,6 @@ func CreateCategory(c *fiber.Ctx) error {
 		slug = body.Slug
 	}
 
-	// Override with Form values if available
 	if c.FormValue("name") != "" {
 		name = c.FormValue("name")
 	}
@@ -129,10 +129,18 @@ func CreateCategory(c *fiber.Ctx) error {
 }
 
 func UpdateCategory(c *fiber.Ctx) error {
-	id := c.Params("id")
+	id := c.Query("id")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(struct {
+			Success bool   `json:"success"`
+			Message string `json:"message"`
+		}{
+			Success: false,
+			Message: "id parameter is required",
+		})
+	}
 	var name, slug string
 
-	// Handle JSON body
 	var body struct {
 		Name string `json:"name"`
 		Slug string `json:"slug"`
@@ -142,7 +150,6 @@ func UpdateCategory(c *fiber.Ctx) error {
 		slug = body.Slug
 	}
 
-	// Override with Form values if available
 	if c.FormValue("name") != "" {
 		name = c.FormValue("name")
 	}
@@ -199,7 +206,16 @@ func UpdateCategory(c *fiber.Ctx) error {
 }
 
 func DeleteCategory(c *fiber.Ctx) error {
-	id := c.Params("id")
+	id := c.Query("id")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(struct {
+			Success bool   `json:"success"`
+			Message string `json:"message"`
+		}{
+			Success: false,
+			Message: "id parameter is required",
+		})
+	}
 
 	if err := admin_service.DeleteCategory(id); err != nil {
 		if err.Error() == "kategori tidak ditemukan" {
@@ -227,8 +243,7 @@ func DeleteCategory(c *fiber.Ctx) error {
 		Message      string      `json:"message"`
 		Categorydata interface{} `json:"Categorydata"`
 	}{
-		Success:      true,
-		Message:      "data kategori berhasil dihapus",
-		Categorydata: fiber.Map{"id": id},
+		Success: true,
+		Message: "data kategori berhasil dihapus",
 	})
 }

@@ -6,9 +6,22 @@ import (
 )
 
 func GetAllProducts() ([]model.Product, error) {
-	return repository.GetAllProducts()
+	productsAdmin, err := repository.GetAllProducts()
+	if err != nil {
+		return nil, err
+	}
+
+	var products []model.Product
+	for _, p := range productsAdmin {
+		products = append(products, p.Product)
+	}
+	return products, nil
 }
 
 func GetProductByID(id string) (model.Product, error) {
-	return repository.GetProductByID(id)
+	productAdmin, err := repository.GetProductDetailByID(id)
+	if err != nil {
+		return model.Product{}, err
+	}
+	return productAdmin.Product, nil
 }

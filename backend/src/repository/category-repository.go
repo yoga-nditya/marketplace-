@@ -5,26 +5,26 @@ import (
 	"marketplace-backend/src/model"
 )
 
-func GetAllCategories() ([]model.Category, error) {
-	var categories []model.Category
+func GetAllCategories() ([]model.CategoryAdmin, error) {
+	var categories []model.CategoryAdmin
 	err := config.DB.Find(&categories).Error
 	return categories, err
 }
 
-func GetCategoryByID(id string) (model.Category, error) {
-	var category model.Category
+func GetCategoryByID(id string) (model.CategoryAdmin, error) {
+	var category model.CategoryAdmin
 	err := config.DB.First(&category, "id = ?", id).Error
 	return category, err
 }
 
-func CreateCategory(category model.Category) error {
+func CreateCategory(category model.CategoryAdmin) error {
 	return config.DB.Create(&category).Error
 }
 
-func UpdateCategory(category model.Category) error {
+func UpdateCategory(category model.CategoryAdmin) error {
 	return config.DB.Save(&category).Error
 }
 
 func DeleteCategory(id string) error {
-	return config.DB.Delete(&model.Category{}, "id = ?", id).Error
+	return config.DB.Delete(&model.CategoryAdmin{}, "id = ?", id).Error
 }

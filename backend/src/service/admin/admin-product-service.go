@@ -9,17 +9,17 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAllProductsAdmin() ([]model.Product, error) {
+func GetAllProductsAdmin() ([]model.ProductAdmin, error) {
 	return repository.GetAllProducts()
 }
 
-func GetProductByID(id string) (model.Product, error) {
-	return repository.GetProductByID(id)
+func GetProductByID(id string) (model.ProductAdmin, error) {
+	return repository.GetProductDetailByID(id)
 }
 
-func CreateProduct(p model.Product) (model.Product, error) {
+func CreateProduct(p model.ProductAdmin) (model.ProductAdmin, error) {
 	if p.Name == "" {
-		return model.Product{}, errors.New("nama produk tidak boleh kosong")
+		return model.ProductAdmin{}, errors.New("nama produk tidak boleh kosong")
 	}
 
 	if p.Slug == "" {
@@ -31,19 +31,18 @@ func CreateProduct(p model.Product) (model.Product, error) {
 	}
 
 	if err := repository.CreateProduct(p); err != nil {
-		return model.Product{}, err
+		return model.ProductAdmin{}, err
 	}
 
 	return p, nil
 }
 
-func UpdateProduct(p model.Product) (model.Product, error) {
+func UpdateProduct(p model.ProductAdmin) (model.ProductAdmin, error) {
 	existing, err := repository.GetProductByID(p.ID)
 	if err != nil {
-		return model.Product{}, errors.New("produk tidak ditemukan")
+		return model.ProductAdmin{}, errors.New("produk tidak ditemukan")
 	}
 
-	// Update fields if provided
 	if p.Name != "" {
 		existing.Name = p.Name
 		if p.Slug == "" {
@@ -79,7 +78,7 @@ func UpdateProduct(p model.Product) (model.Product, error) {
 	}
 
 	if err := repository.UpdateProduct(existing); err != nil {
-		return model.Product{}, err
+		return model.ProductAdmin{}, err
 	}
 
 	return existing, nil

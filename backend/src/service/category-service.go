@@ -6,9 +6,22 @@ import (
 )
 
 func GetAllCategories() ([]model.Category, error) {
-	return repository.GetAllCategories()
+	categoriesAdmin, err := repository.GetAllCategories()
+	if err != nil {
+		return nil, err
+	}
+
+	var categories []model.Category
+	for _, cat := range categoriesAdmin {
+		categories = append(categories, cat.Category)
+	}
+	return categories, nil
 }
 
 func GetCategoryByID(id string) (model.Category, error) {
-	return repository.GetCategoryByID(id)
+	categoryAdmin, err := repository.GetCategoryByID(id)
+	if err != nil {
+		return model.Category{}, err
+	}
+	return categoryAdmin.Category, nil
 }
