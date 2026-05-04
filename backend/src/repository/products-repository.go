@@ -10,6 +10,7 @@ func GetAllProducts() ([]model.ProductAdmin, error) {
 	err := config.DB.Model(&model.ProductAdmin{}).
 		Select("products.*, categories.name as categories_id").
 		Joins("left join categories on categories.id = products.categories_id").
+		Order("products.created_at ASC").
 		Find(&products).Error
 	return products, err
 }

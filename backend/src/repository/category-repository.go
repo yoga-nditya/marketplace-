@@ -7,7 +7,7 @@ import (
 
 func GetAllCategories() ([]model.CategoryAdmin, error) {
 	var categories []model.CategoryAdmin
-	err := config.DB.Find(&categories).Error
+	err := config.DB.Order("created_at ASC").Find(&categories).Error
 	return categories, err
 }
 
