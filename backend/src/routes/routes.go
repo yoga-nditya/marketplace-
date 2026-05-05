@@ -26,4 +26,9 @@ func SetupRoutes(app *fiber.App) {
 	admin.Post("/products", admin_controller.CreateProduct)
 	admin.Put("/products", admin_controller.UpdateProduct)
 	admin.Delete("/products", admin_controller.DeleteProduct)
+
+	admin.Get("/banners", admin_controller.GetBannersAdmin)
+	admin.Post("/banners", admin_controller.CreateBanner)
+	admin.Put("/banners", admin_controller.UpdateBanner)
+	admin.Delete("/banners", admin_controller.DeleteBanner)
 }
