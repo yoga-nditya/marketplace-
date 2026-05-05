@@ -1,36 +1,16 @@
-# Perencanaan Implementasi API Banners untuk Halaman Admin
+# Perencanaan Integrasi Frontend: Halaman Admin Banner dengan API
 
-Dokumen ini berisi panduan dan spesifikasi untuk mengimplementasikan fitur API CRUD Banners pada halaman admin. Harap ikuti langkah-langkah di bawah ini secara berurutan.
+Dokumen ini berisi panduan tahap demi tahap untuk mengintegrasikan tampilan halaman Admin Banner (Frontend) dengan endpoint API `api/admin/banners` yang sudah tersedia di Backend.
 
-## 1. Spesifikasi Database
-
-Tabel yang digunakan adalah `banners`. Pastikan untuk mengeluarkan atau memetakan semua field berikut sesuai dengan tipe datanya:
-
-| Field      | Type         | Null | Key | Default           | Extra                                         |
-|------------|--------------|------|-----|-------------------|-----------------------------------------------|
-| id         | char(36)     | NO   | PRI | NULL              | Menggunakan UUID                              |
-| title      | varchar(255) | NO   |     | NULL              |                                               |
-| image      | varchar(255) | NO   |     | NULL              |                                               |
-| is_active  | tinyint(1)   | NO   |     | 1                 |                                               |
-| deleted_at | timestamp    | YES  |     | NULL              |                                               |
-| created_at | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
-| updated_at | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
+## Tujuan
+Membuat agar halaman daftar banner, form tambah banner, dan form edit banner di panel admin dapat mengambil (fetch), menambah, mengubah, dan menghapus data menggunakan API Admin Banners.
 
 ---
 
-## 2. Definisi Endpoint
+## Referensi API Backend yang Sudah Ada
 
-- `GET /api/admin/banners`
-- `POST /api/admin/banners`
-- `PUT /api/admin/banners/{id}`
-- `DELETE /api/admin/banners/{id}`
-
----
-
-## 3. Spesifikasi Format Response & Request
-
-### A. GET Banners (Success - 200 OK)
-Digunakan untuk menarik list banner.
+### 1. GET `/api/admin/banners` (Mengambil Data)
+**Response (200 Success):**
 ```json
 {
    "success": true,
@@ -49,106 +29,96 @@ Digunakan untuk menarik list banner.
 }
 ```
 
-### B. POST Banners (Success - 201 Created)
-**Request Body:**
-```json
-{
-    "title": "string",
-    "image": "string",
-    "is_active": "integer"
-}
-```
+### 2. POST `/api/admin/banners` (Tambah Data)
+**Request Body (FormData):**
+- `title`: string
+- `image`: file/string
+- `is_active`: integer (0 atau 1)
 
-**Response Body:**
+**Response (201 Created):**
 ```json
 {
     "success": true,
     "message": "data banners berhasil ditambahkan",
     "Bannerdata": [
-        {
-            "id": "string",
-            "title": "string",
-            "image": "string",
-            "is_active": "integer",
-            "deleted_at": "timestamp | null",
-            "created_at": "timestamp",
-            "updated_at": "timestamp"
-        }
+        { ...struktur banner... }
    ]
 }
 ```
 
-### C. PUT Banners (Success - 200 OK)
-**Response Body:**
+### 3. PUT `/api/admin/banners/{id}` atau `?id={id}` (Update Data)
+**Request Body (FormData):** (Sama seperti POST, hanya field yang diubah)
+
+**Response (200 Success):**
 ```json
 {
     "success": true,
     "message": "data banners berhasil di update",
     "Bannerdata": [
-        {
-            "id": "string",
-            "title": "string",
-            "image": "string",
-            "is_active": "integer",
-            "deleted_at": "timestamp | null",
-            "created_at": "timestamp",
-            "updated_at": "timestamp"
-        }
+        { ...struktur banner... }
    ]
 }
 ```
 
-### D. DELETE Banners (Success - 200 OK)
-**Response Body:**
+### 4. DELETE `/api/admin/banners/{id}` atau `?id={id}` (Hapus Data)
+**Response (200 Success):**
 ```json
 {
     "success": true,
-    "message": "data banners berhasil dihapus",
-    "Bannerdata": [
-        {
-            "id": "string"
-        }
-   ]
+    "message": "data banners berhasil dihapus"
 }
 ```
 
-### E. Error Response (Contoh: Bad Request / Internal Server Error)
+### 5. Response Error (Global)
 ```json
 {
     "success": false,
-    "message": "error (sesuaikan pesannya. misal: data banners gagal ditambahkan, id tidak ditemukan, dll)"
+    "message": "error (pesan disesuaikan...)"
 }
 ```
 
 ---
 
-## 4. Tahapan Implementasi
+## Tahapan Implementasi Frontend (Action Plan)
 
-Berikut adalah detail tahapan yang harus dilakukan untuk mengimplementasikan fitur ini. **(Tidak perlu menulis kode di sini, cukup ikuti alur logikanya saat implementasi)**:
+Bagi programmer atau model AI yang akan mengimplementasikan ini, silakan ikuti alur kerja berikut secara berurutan. **Penting:** Tampilan UI harus selaras dan mirip dengan modul Kategori dan Produk.
 
-### Langkah 1: Persiapan Model Data (Entity/Struct)
-- Petakan skema tabel `banners` yang telah dijelaskan di atas ke dalam struktur data di dalam kode. Pastikan tipe datanya relevan (terutama konversi dari UUID ke `string` dan `tinyint` ke `integer` atau `boolean` tergantung bahasa).
-- Buat object request / payload handler khusus untuk POST dan PUT yang hanya memvalidasi field `title`, `image`, dan `is_active`.
+### Tahap 1: Persiapan Service API (Frontend)
+1. Buat file service baru (misal: `services/adminBannerService.ts`).
+2. Definisikan antarmuka/tipe data (`interface` atau `type`) untuk objek Banner yang sesuai dengan struktur JSON dari backend.
+3. Buat 5 fungsi untuk melakukan pemanggilan HTTP menggunakan Axios atau Fetch:
+   - `fetchAdminBanners()`: Memanggil endpoint GET.
+   - `fetchBannerById(id)`: Memanggil endpoint GET dengan spesifik ID (untuk keperluan form edit).
+   - `createBanner(data)`: Memanggil endpoint POST. Pastikan *header* diset sebagai `multipart/form-data` karena ada upload gambar.
+   - `updateBanner(id, data)`: Memanggil endpoint PUT. Header juga `multipart/form-data`.
+   - `deleteBanner(id)`: Memanggil endpoint DELETE.
 
-### Langkah 2: Implementasi Service Layer (Logika Aplikasi)
-Lokasi: `src/admin/service/` (misal: `admin-banner-service.ts`)
-- **Fungsi GET:** Buat logika untuk melakukan *query* pengambilan semua data banner dari database. Pastikan semua field ter-select.
-- **Fungsi POST:** Buat logika yang menerima payload dari pengguna, *generate* ID baru bertipe UUID (karena field id adalah char 36), set nilai default jika perlu, dan simpan ke database. 
-- **Fungsi PUT:** Buat logika untuk mengecek apakah data dengan ID yang diberikan ada di tabel. Jika ada, lakukan update pada baris tersebut dengan data payload baru.
-- **Fungsi DELETE:** Buat logika untuk menghapus banner. Tentukan apakah menggunakan *hard delete* atau *soft delete* (dengan mengisi kolom `deleted_at`) menyesuaikan dengan konvensi dari entitas lain di project ini.
+### Tahap 2: Halaman Daftar Banner (List View)
+1. Buat halaman utama untuk admin banner (misal: `app/admin/banners/page.tsx`).
+2. Buat tabel data dengan kolom: ID, Gambar, Judul, Status (Aktif/Non-Aktif), dan Aksi.
+3. Gunakan `useEffect` untuk memanggil fungsi `fetchAdminBanners()` saat halaman pertama kali dimuat, dan simpan hasilnya di dalam state.
+4. Implementasikan fungsionalitas pendukung (mirip halaman produk):
+   - Kolom pencarian (Search).
+   - Pengurutan data (Sorting).
+   - Paginasi (Pagination).
+5. Pada kolom aksi, sediakan tombol **Edit** (mengarahkan ke rute edit) dan tombol **Delete**.
+6. Untuk tombol Delete, tampilkan konfirmasi menggunakan SweetAlert2 sebelum memanggil `deleteBanner(id)`. Jika sukses, *refresh* tabel data.
 
-### Langkah 3: Implementasi Controller / Handler
-- Buat fungsi handler untuk menangkap request HTTP untuk setiap aksi (GET, POST, PUT, DELETE).
-- Panggil logika dari Service Layer yang sesuai.
-- Format hasil return dari Service ke dalam format JSON response yang **persis sama** dengan pedoman Spesifikasi Format Response di atas. Perhatikan huruf besar/kecil seperti key `"Bannerdata"`.
-- Atur **HTTP Status Code** dengan benar (200 untuk OK, 201 untuk Created, 400/500 untuk error).
+### Tahap 3: Halaman Tambah Banner (Create View)
+1. Buat halaman form tambah (misal: `app/admin/banners/add/page.tsx`).
+2. Buat elemen form yang terdiri dari:
+   - Input teks untuk Judul.
+   - Dropdown (Select) untuk Status Aktif (1) atau Non-Aktif (0).
+   - Input file untuk Gambar (dilengkapi dengan *preview* gambar yang dipilih).
+3. Tangani *submit* form dengan mengemas data ke dalam objek `FormData`.
+4. Panggil fungsi `createBanner()`. Jika balikan JSON `success` bernilai true, tampilkan pop-up sukses dan arahkan (*redirect*) user kembali ke halaman daftar banner. Jika false, tampilkan pesan error.
 
-### Langkah 4: Registrasi Routing
-Lokasi: `src/admin/routes/` (misal: `admin-banner-routes.ts`)
-- Definisikan rute untuk masing-masing endpoint (`/api/admin/banners` dan `/api/admin/banners/{id}`).
-- Hubungkan rute-rute tersebut (menggunakan HTTP Method yang sesuai: GET, POST, PUT, DELETE) dengan fungsi handler di dalam Controller yang telah disiapkan di Langkah 3.
+### Tahap 4: Halaman Edit Banner (Update View)
+1. Buat halaman form edit yang menerima ID dari parameter URL (misal: `app/admin/banners/edit/[id]/page.tsx`).
+2. Gunakan `useEffect` untuk memanggil `fetchBannerById(id)` dan jadikan responsenya sebagai *default value* pada inputan form.
+3. Sediakan struktur form yang persis sama dengan halaman Tambah Banner, namun informasikan bahwa input gambar bersifat opsional (jika tidak diunggah, tidak mengubah gambar lama).
+4. Saat disubmit, kemas perubahan ke dalam `FormData` dan panggil `updateBanner(id)`. Berikan notifikasi sukses/gagal lalu arahkan kembali ke halaman daftar.
 
-### Langkah 5: Testing (Pengujian)
-- Jalankan aplikasi.
-- Lakukan pengujian menggunakan REST Client (seperti Postman atau cURL).
-- Validasi bahwa balikan JSON-nya (baik key seperti `success`, `message`, `Bannerdata`, maupun isinya) tidak ada yang meleset dari kontrak response di atas, baik pada saat kondisi sukses maupun saat kondisi gagal (error handling).
+### Tahap 5: Integrasi Navigasi (Sidebar)
+1. Buka komponen Sidebar admin (`AdminSidebar.tsx`).
+2. Tambahkan menu baru bernama "Banner" dengan ikon yang merepresentasikan gambar, lalu arahkan tautannya ke `/admin/banners`.
