@@ -18,11 +18,11 @@ const formatRupiah = (number: number) => {
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [quantity, setQuantity] = useState(1);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -81,8 +81,8 @@ export default function ProductDetailPage() {
           <p className="text-gray-500 max-w-md mx-auto">
             Maaf, produk yang Anda cari tidak tersedia atau terjadi kesalahan saat memuat data.
           </p>
-          <Link 
-            href="/home" 
+          <Link
+            href="/home"
             className="inline-block bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-md"
           >
             Kembali ke Beranda
@@ -97,7 +97,7 @@ export default function ProductDetailPage() {
   return (
     <div className="bg-white min-h-screen py-4 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Breadcrumb - Sesuai Screenshot (Boxed dengan Shadow) */}
         <nav className="bg-white px-6 py-4 rounded-xl border border-gray-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] mb-10 flex items-center gap-3 text-sm text-gray-600">
           <Link href="/home" className="flex items-center gap-2 hover:text-black transition-colors font-medium">
@@ -112,10 +112,7 @@ export default function ProductDetailPage() {
           <span className="text-gray-400 truncate">{product.name}</span>
         </nav>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Kolom Kiri: Gambar Produk */}
           <div className="lg:col-span-3">
             <div className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm sticky top-24">
               <div className="relative aspect-square w-full bg-gray-50">
@@ -128,7 +125,6 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Kolom Tengah: Info Detail Produk */}
           <div className="lg:col-span-6 space-y-6">
             <div className="space-y-1">
               <h1 className="text-xl font-bold text-black leading-tight">
@@ -153,7 +149,7 @@ export default function ProductDetailPage() {
                   {product.description || "Tidak ada deskripsi untuk produk ini."}
                 </div>
                 {product.description && product.description.length > 200 && (
-                  <button 
+                  <button
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="text-indigo-600 text-xs font-bold hover:underline"
                   >
@@ -164,14 +160,11 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Kolom Kanan: Kotak Aksi Checkout */}
           <div className="lg:col-span-3">
             <div className="bg-white p-5 rounded-xl border border-gray-200 sticky top-24 shadow-sm">
               <h3 className="text-black font-bold text-sm mb-4">Pilih jumlah</h3>
-              
-              {/* Counter Component */}
               <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden w-full mb-4">
-                <button 
+                <button
                   onClick={decrement}
                   className="p-2.5 hover:bg-gray-50 transition-colors text-gray-500 active:bg-gray-100 disabled:opacity-30"
                   disabled={quantity <= 1}
@@ -181,7 +174,7 @@ export default function ProductDetailPage() {
                 <div className="flex-1 text-center font-bold text-black py-2 text-sm">
                   {quantity}
                 </div>
-                <button 
+                <button
                   onClick={increment}
                   className="p-2.5 hover:bg-gray-50 transition-colors text-gray-500 active:bg-gray-100 disabled:opacity-30"
                   disabled={product ? quantity >= product.stock_amount : true}
@@ -204,7 +197,7 @@ export default function ProductDetailPage() {
                 </p>
               </div>
 
-              <button 
+              <button
                 disabled={product.stock_amount <= 0}
                 className="w-full bg-indigo-600 text-white py-3.5 px-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all text-sm shadow-md active:scale-[0.98] disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
