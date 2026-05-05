@@ -105,9 +105,9 @@ export default function ProductDetailPage() {
             <span>Beranda</span>
           </Link>
           <ChevronRight size={14} className="text-gray-300" />
-          <Link href="/products" className="hover:text-black transition-colors font-medium">
+          <span className="font-medium">
             Produk
-          </Link>
+          </span>
           <ChevronRight size={14} className="text-gray-300" />
           <span className="text-gray-400 truncate">{product.name}</span>
         </nav>

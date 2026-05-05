@@ -43,4 +43,3 @@ export async function fetchProductById(id: string): Promise<Product | null> {
     return null;
   }
 }
-
