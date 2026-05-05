@@ -100,7 +100,7 @@ func CreateBanner(c *fiber.Ctx) error {
 	var imageName string
 	if err == nil {
 		imageName = fmt.Sprintf("%d%s", time.Now().UnixNano(), filepath.Ext(file.Filename))
-		if err := c.SaveFile(file, "./assets/banners/"+imageName); err != nil {
+		if err := c.SaveFile(file, "./assets/img/banner/"+imageName); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(struct {
 				Success bool   `json:"success"`
 				Message string `json:"message"`
@@ -128,7 +128,7 @@ func CreateBanner(c *fiber.Ctx) error {
 		Bannerdata interface{} `json:"Bannerdata"`
 	}{
 		Success:    true,
-		Message:    "data banners berhasil ditambahkan",
+		Message:    "data banner berhasil ditambahkan",
 		Bannerdata: []model.BannerAdmin{banner},
 	})
 }
@@ -176,7 +176,7 @@ func UpdateBanner(c *fiber.Ctx) error {
 	var imageName string
 	if err == nil {
 		imageName = fmt.Sprintf("%d%s", time.Now().UnixNano(), filepath.Ext(file.Filename))
-		if err := c.SaveFile(file, "./assets/banners/"+imageName); err != nil {
+		if err := c.SaveFile(file, "./assets/img/banner/"+imageName); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(struct {
 				Success bool   `json:"success"`
 				Message string `json:"message"`
@@ -215,7 +215,7 @@ func UpdateBanner(c *fiber.Ctx) error {
 		Bannerdata interface{} `json:"Bannerdata"`
 	}{
 		Success:    true,
-		Message:    "data banners berhasil di update",
+		Message:    "data banner berhasil di update",
 		Bannerdata: []model.BannerAdmin{banner},
 	})
 }
@@ -260,6 +260,6 @@ func DeleteBanner(c *fiber.Ctx) error {
 		Message string `json:"message"`
 	}{
 		Success: true,
-		Message: "data banners berhasil dihapus",
+		Message: "data banner berhasil dihapus",
 	})
 }
