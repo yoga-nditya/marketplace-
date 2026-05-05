@@ -1,150 +1,154 @@
-# Implementasi API Admin Products dan Integrasi Frontend
+# Perencanaan Implementasi API Banners untuk Halaman Admin
 
-**Tujuan:**
-Mengimplementasikan API CRUD untuk entitas `Product` pada sisi admin dan memastikan halaman beserta form admin dapat terintegrasi dengan API tersebut.
+Dokumen ini berisi panduan dan spesifikasi untuk mengimplementasikan fitur API CRUD Banners pada halaman admin. Harap ikuti langkah-langkah di bawah ini secara berurutan.
 
-## 1. Spesifikasi API
+## 1. Spesifikasi Database
 
-Berikut adalah kontrak API yang perlu diimplementasikan di backend dan dikonsumsi oleh frontend:
+Tabel yang digunakan adalah `banners`. Pastikan untuk mengeluarkan atau memetakan semua field berikut sesuai dengan tipe datanya:
 
-### 1.1 GET `/api/admin/products`
-Digunakan untuk mengambil semua daftar produk pada halaman admin.
+| Field      | Type         | Null | Key | Default           | Extra                                         |
+|------------|--------------|------|-----|-------------------|-----------------------------------------------|
+| id         | char(36)     | NO   | PRI | NULL              | Menggunakan UUID                              |
+| title      | varchar(255) | NO   |     | NULL              |                                               |
+| image      | varchar(255) | NO   |     | NULL              |                                               |
+| is_active  | tinyint(1)   | NO   |     | 1                 |                                               |
+| deleted_at | timestamp    | YES  |     | NULL              |                                               |
+| created_at | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updated_at | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
 
-**Response (200 Success):**
+---
+
+## 2. Definisi Endpoint
+
+- `GET /api/admin/banners`
+- `POST /api/admin/banners`
+- `PUT /api/admin/banners/{id}`
+- `DELETE /api/admin/banners/{id}`
+
+---
+
+## 3. Spesifikasi Format Response & Request
+
+### A. GET Banners (Success - 200 OK)
+Digunakan untuk menarik list banner.
 ```json
 {
    "success": true,
    "message": "data berhasil ditemukan",
-   "Productdata": [
+   "Bannerdata": [
         {
             "id": "string",
-            "categories_id": "string",
-            "category_name": "string",
-            "name": "string",
+            "title": "string",
             "image": "string",
-            "price": 10000,
-            "capital_price": 5000,
-            "description": "string",
-            "weight": 100,
-            "stock_amount": 10,
-            "minimum_order": 1,
-            "slug": "string",
-            "deleted_at": null,
-            "created_at": "2024-05-01 10:00:00",
-            "updated_at": "2024-05-01 10:00:00"
+            "is_active": "integer",
+            "deleted_at": "timestamp | null",
+            "created_at": "timestamp",
+            "updated_at": "timestamp"
         }
    ]
 }
 ```
 
-### 1.2 POST `/api/admin/products`
-Digunakan untuk menambahkan produk baru melalui form admin.
-
+### B. POST Banners (Success - 201 Created)
 **Request Body:**
 ```json
 {
-    "categories_id": "string",
-    "name": "string",
+    "title": "string",
     "image": "string",
-    "price": 10000,
-    "capital_price": 5000,
-    "description": "string",
-    "weight": 100,
-    "stock_amount": 10,
-    "minimum_order": 1,
-    "slug": "string"
+    "is_active": "integer"
 }
 ```
 
-**Response (201 Created):**
+**Response Body:**
 ```json
 {
     "success": true,
-    "message": "data product berhasil ditambahkan",
-    "Productdata": [
+    "message": "data banners berhasil ditambahkan",
+    "Bannerdata": [
         {
             "id": "string",
-            "categories_id": "string",
-            "category_name": "string",
-            "name": "string",
+            "title": "string",
             "image": "string",
-            "price": 10000,
-            "capital_price": 5000,
-            "description": "string",
-            "weight": 100,
-            "stock_amount": 10,
-            "minimum_order": 1,
-            "slug": "string",
-            "deleted_at": null,
-            "created_at": "2024-05-01 10:00:00",
-            "updated_at": "2024-05-01 10:00:00"
+            "is_active": "integer",
+            "deleted_at": "timestamp | null",
+            "created_at": "timestamp",
+            "updated_at": "timestamp"
         }
    ]
 }
 ```
 
-### 1.3 PUT `/api/admin/products/{id}`
-Digunakan untuk mengupdate data produk yang ada melalui form admin.
-
-**Response (200 Success):**
+### C. PUT Banners (Success - 200 OK)
+**Response Body:**
 ```json
 {
     "success": true,
-    "message": "data product berhasil di update",
-    "Productdata": [
+    "message": "data banners berhasil di update",
+    "Bannerdata": [
         {
             "id": "string",
-            "categories_id": "string",
-            "category_name": "string",
-            "name": "string",
+            "title": "string",
             "image": "string",
-            "price": 10000,
-            "capital_price": 5000,
-            "description": "string",
-            "weight": 100,
-            "stock_amount": 10,
-            "minimum_order": 1,
-            "slug": "string",
-            "deleted_at": null,
-            "created_at": "2024-05-01 10:00:00",
-            "updated_at": "2024-05-01 10:00:00"
+            "is_active": "integer",
+            "deleted_at": "timestamp | null",
+            "created_at": "timestamp",
+            "updated_at": "timestamp"
         }
    ]
 }
 ```
 
-### 1.4 DELETE `/api/admin/products/{id}`
-Digunakan untuk menghapus produk dari halaman admin.
-
-**Response (200 Success):**
+### D. DELETE Banners (Success - 200 OK)
+**Response Body:**
 ```json
 {
     "success": true,
-    "message": "data product berhasil dihapus"
+    "message": "data banners berhasil dihapus",
+    "Bannerdata": [
+        {
+            "id": "string"
+        }
+   ]
 }
 ```
 
-### 1.5 Error Response (Format Umum)
-Jika terjadi error (misalnya validasi gagal, ID tidak ditemukan, internal server error).
-
-**Response (4xx / 5xx):**
+### E. Error Response (Contoh: Bad Request / Internal Server Error)
 ```json
 {
     "success": false,
-    "message": "pesan error disesuaikan (misal: data tidak lengkap, gagal ditambahkan, bad request, atau internal server error tergantung case-nya)"
+    "message": "error (sesuaikan pesannya. misal: data banners gagal ditambahkan, id tidak ditemukan, dll)"
 }
 ```
 
-## 2. Instruksi Implementasi
+---
 
-### Bagian Backend (Go)
-1. **Routing:** Pastikan endpoint `GET`, `POST`, `PUT`, dan `DELETE` untuk `/api/admin/products` sudah terdaftar di `routes.go` di dalam group route admin.
-2. **Controller (`admin-product-controller.go`):** Implementasikan handler untuk masing-masing endpoint dengan memastikan struktur response JSON sesuai dengan spesifikasi (mengandung `success`, `message`, dan `Productdata`).
-3. **Service & Repository:** Pastikan logika untuk mengambil `category_name` melalui relasi/join database telah diimplementasikan agar format kembalian sesuai dengan object JSON di atas.
+## 4. Tahapan Implementasi
 
-### Bagian Frontend (Admin UI)
-1. **Daftar Produk (Table):** Fetch data dari endpoint `GET /api/admin/products` dan render list `Productdata` ke dalam tabel di halaman admin produk.
-2. **Form Tambah Produk:** Sesuaikan payload data form dengan format Request Body `POST`. Hit endpoint POST saat form disubmit.
-3. **Form Edit Produk:** Ambil ID produk yang ingin diubah, isi form dengan data eksisting, dan submit ke endpoint `PUT /api/admin/products/{id}`.
-4. **Hapus Produk:** Hubungkan tombol delete/hapus ke endpoint `DELETE /api/admin/products/{id}`.
-5. **Feedback & Refresh Data:** Tampilkan notifikasi berdasarkan pesan `message` dari response backend (baik ketika success maupun error) dan jangan lupa refresh/fetch ulang daftar produk setiap kali operasi POST, PUT, atau DELETE berhasil dilakukan.
+Berikut adalah detail tahapan yang harus dilakukan untuk mengimplementasikan fitur ini. **(Tidak perlu menulis kode di sini, cukup ikuti alur logikanya saat implementasi)**:
+
+### Langkah 1: Persiapan Model Data (Entity/Struct)
+- Petakan skema tabel `banners` yang telah dijelaskan di atas ke dalam struktur data di dalam kode. Pastikan tipe datanya relevan (terutama konversi dari UUID ke `string` dan `tinyint` ke `integer` atau `boolean` tergantung bahasa).
+- Buat object request / payload handler khusus untuk POST dan PUT yang hanya memvalidasi field `title`, `image`, dan `is_active`.
+
+### Langkah 2: Implementasi Service Layer (Logika Aplikasi)
+Lokasi: `src/admin/service/` (misal: `admin-banner-service.ts`)
+- **Fungsi GET:** Buat logika untuk melakukan *query* pengambilan semua data banner dari database. Pastikan semua field ter-select.
+- **Fungsi POST:** Buat logika yang menerima payload dari pengguna, *generate* ID baru bertipe UUID (karena field id adalah char 36), set nilai default jika perlu, dan simpan ke database. 
+- **Fungsi PUT:** Buat logika untuk mengecek apakah data dengan ID yang diberikan ada di tabel. Jika ada, lakukan update pada baris tersebut dengan data payload baru.
+- **Fungsi DELETE:** Buat logika untuk menghapus banner. Tentukan apakah menggunakan *hard delete* atau *soft delete* (dengan mengisi kolom `deleted_at`) menyesuaikan dengan konvensi dari entitas lain di project ini.
+
+### Langkah 3: Implementasi Controller / Handler
+- Buat fungsi handler untuk menangkap request HTTP untuk setiap aksi (GET, POST, PUT, DELETE).
+- Panggil logika dari Service Layer yang sesuai.
+- Format hasil return dari Service ke dalam format JSON response yang **persis sama** dengan pedoman Spesifikasi Format Response di atas. Perhatikan huruf besar/kecil seperti key `"Bannerdata"`.
+- Atur **HTTP Status Code** dengan benar (200 untuk OK, 201 untuk Created, 400/500 untuk error).
+
+### Langkah 4: Registrasi Routing
+Lokasi: `src/admin/routes/` (misal: `admin-banner-routes.ts`)
+- Definisikan rute untuk masing-masing endpoint (`/api/admin/banners` dan `/api/admin/banners/{id}`).
+- Hubungkan rute-rute tersebut (menggunakan HTTP Method yang sesuai: GET, POST, PUT, DELETE) dengan fungsi handler di dalam Controller yang telah disiapkan di Langkah 3.
+
+### Langkah 5: Testing (Pengujian)
+- Jalankan aplikasi.
+- Lakukan pengujian menggunakan REST Client (seperti Postman atau cURL).
+- Validasi bahwa balikan JSON-nya (baik key seperti `success`, `message`, `Bannerdata`, maupun isinya) tidak ada yang meleset dari kontrak response di atas, baik pada saat kondisi sukses maupun saat kondisi gagal (error handling).
