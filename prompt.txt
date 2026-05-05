@@ -2,127 +2,254 @@ buatkan issue.md yang berisi perencanaan untuk nanti di implementasikan untuk ju
 
 isi dari planing nya adalah sebagai berikut : 
 
-buatkan api untuk GET dan POST dan update dan delete categories untuk halaman admin
+buatkan api untuk GET dan POST dan update dan delete products untuk halaman admin
 
 endpoint : 
-- GET /api/admin/category
-- POST /api/admin/category
-- PUT /api/admin/category/{id}
-- DELETE /api/admin/category/{id}
+- GET /api/admin/products
+- POST /api/admin/products
+- PUT /api/admin/products/{id}
+- DELETE /api/admin/products/{id}
 
 untuk response nya menyesuaikan di database seperti gambar yang saya berikan tolong keluarkan semua field saya
 
- id         | char(36)     | NO   | PRI | NULL    |       |
-| name       | varchar(255) | NO   |     | NULL    |       |
-| image      | varchar(255) | YES  |     | NULL    |       |
-| slug       | varchar(255) | NO   |     | NULL    |       |
-| deleted_at | timestamp    | YES  |     | NULL    |       |
-| created_at | timestamp    | YES  |     | NULL    |       |
-| updated_at | timestamp    | YES  |     | NULL    |
+ Field         | Type         | Null | Key | Default | Extra |
++---------------+--------------+------+-----+---------+-------+
+| id            | char(36)     | NO   | PRI | NULL    |       |
+| categories_id | char(36)     | YES  | MUL | NULL    |       |
+| name          | varchar(255) | NO   |     | NULL    |       |
+| image         | varchar(255) | YES  |     | NULL    |       |
+| price         | int unsigned | NO   |     | 0       |       |
+| capital_price | int unsigned | NO   |     | 0       |       |
+| description   | text         | NO   |     | NULL    |       |
+| weight        | int unsigned | NO   |     | NULL    |       |
+| stock_amount  | int unsigned | NO   |     | NULL    |       |
+| minimum_order | int unsigned | NO   |     | NULL    |       |
+| slug          | varchar(255) | NO   |     | NULL    |       |
+| deleted_at    | timestamp    | YES  |     | NULL    |       |
+| created_at    | timestamp    | YES  |     | NULL    |       |
+| updated_at    | timestamp    | YES  |     | NULL    |
 
 struktur folder di dalam src/admin : 
 - routes : berisi routing
 - service : berisi logic aplikasi
 
 struktur file : 
-- routes : menggunakan format misal admin-category-routes.ts
-- service : menggunakan format misal admin-category-service.ts
+- routes : menggunakan format misal admin-product-routes.ts
+- service : menggunakan format misal admin-product-service.ts
 
-penerapan nya mirip seperti yang sudah ada seperti kode categories sekarang namun ini halaman admin 
+penerapan nya mirip seperti yang sudah ada seperti kode products sekarang namun ini halaman admin 
 
-response categories get 200 (succsess) :
+response products get 200 (succsess) :
 {
-   Categorydata": [
+   "success": true,
+   "message": "data berhasil ditemukan",
+   "Productdata": [
         {
             "id": "string",
+            "categories_id": "string",
             "name": "string",
             "image": "string",
-            "slug": "string"
+            "price": "integer",
+            "capital_price": "integer",
+            "description": "string",
+            "weight": "integer",
+            "stock_amount": "integer",
+            "minimum_order": "integer",
+            "slug": "string",
+            "deleted_at": "timestamp | null",
+            "created_at": "timestamp",
+            "updated_at": "timestamp"
         },
    ]
 }
 
-dengan request categories untuk POST 201
+dengan request products untuk POST 201
 {
+    "categories_id": "string",
     "name": "string",
     "image": "string",
-    "slug": "string"/mengikuti name untuk slugnya
+    "price": "integer",
+    "capital_price": "integer",
+    "description": "string",
+    "weight": "integer",
+    "stock_amount": "integer",
+    "minimum_order": "integer",
+    "slug": "string"
+
+- Response POST products 201 (succsess) :
+    "success": true,
+    "message": "data product berhasil ditambahkan"
+     "Productdata": [
+        {
+            "id": "string",
+            "categories_id": "string",
+            "name": "string",
+            "image": "string",
+            "price": "integer",
+            "capital_price": "integer",
+            "description": "string",
+            "weight": "integer",
+            "stock_amount": "integer",
+            "minimum_order": "integer",
+            "slug": "string",
+            "deleted_at": "timestamp | null",
+            "created_at": "timestamp",
+            "updated_at": "timestamp"
+        },
+   ]
 }
 
-response body categories update atau put 200 (succsess) :
+response body products update atau put 200 (succsess) :
 {
     "success": true,
-    "message": "data berhasil di update"
+    "message": "data product berhasil di update"
+     "Productdata": [
+        {
+            "id": "string",
+            "categories_id": "string",
+            "name": "string",
+            "image": "string",
+            "price": "integer",
+            "capital_price": "integer",
+            "description": "string",
+            "weight": "integer",
+            "stock_amount": "integer",
+            "minimum_order": "integer",
+            "slug": "string",
+            "deleted_at": "timestamp | null",
+            "created_at": "timestamp",
+            "updated_at": "timestamp"
+        },
+   ]
 }
 
-response body categories delete 200 (succsess) :
+response body products delete 200 (succsess) :
 {
     "success": true,
-    "message": "data berhasil dihapus"
+    "message": "data product berhasil dihapus"
+    "Productdata": [
+        {
+            "id": "string",
+        },
+   ]
 }
 
-response body categories (error) :
+response body products (error) :
 {
     "success": false,
-    "message": "error(bisa kategori gagal ditambahkan atau error bad request atau internal server error tergantung method yang digunakan)"
+    "message": "error(bisa product gagal ditambahkan atau error bad request atau internal server error tergantung method yang digunakan jika kosong maka sesuaikan atau contoh seperti kode api admin categories yang sudah ada pokony aresponse nya mirip2)"
 }
 
 jelaskan tahapan2 yang harus dilakukan untuk implementasi fitur ini anggap nanti yang mengimplementasikan adalah junior programmer atau mode ai yang lebih murah
 dan tidak perlu penjelasan dengan kode hanya detail apa saja yang harus dilakukan
 
 
+
 - buatkan issue.md yang berisi perencanaan untuk nanti di implementasikan untuk junior programmer atau model ai yang  lebih murah
-
 isi dari planing nya adalah sebagai berikut : 
+buatkan agar halaman admin product dan form admin untuk product yang ada bisa fetch menggunakan api admin/products yang sudah ada
 
-buatkan agar halaman admin category dan form admin untuk category yang ada bisa fetch menggunakan api admin/categories yang sudah ada
-
-- GET /api/admin/category (200 Success)
+- GET /api/admin/products (200 Success)
 
 {
-   "Categorydata": [
+   "success": true,
+   "message": "data berhasil ditemukan",
+   "Productdata": [
         {
             "id": "string",
+            "categories_id": "string",
+            "category_name": "string",
             "name": "string",
             "image": "string",
+            "price": 10000,
+            "capital_price": 5000,
+            "description": "string",
+            "weight": 100,
+            "stock_amount": 10,
+            "minimum_order": 1,
             "slug": "string",
-            "deleted_at": "timestamp | null",
-            "created_at": "timestamp",
-            "updated_at": "timestamp"
+            "deleted_at": null,
+            "created_at": "2024-05-01 10:00:00",
+            "updated_at": "2024-05-01 10:00:00"
         }
    ]
 }
 
-POST /api/admin/category (201 Created)
+POST /api/admin/products (201 Created)
 Request Body:
 {
+    "categories_id": "string",
     "name": "string",
     "image": "string",
-    "slug": "string" // Dihasilkan mengikuti "name"
+    "price": 10000,
+    "capital_price": 5000,
+    "description": "string",
+    "weight": 100,
+    "stock_amount": 10,
+    "minimum_order": 1,
+    "slug": "string"
 }
 
-Response Body POST /api/admin/category (201 Created)
+Response Body POST /api/admin/products (201 Created)
 
 {
     "success": true,
-    "message": "data kategori berhasil ditambahkan"
+    "message": "data product berhasil ditambahkan",
+    "Productdata": [
+        {
+            "id": "string",
+            "categories_id": "string",
+            "category_name": "string",
+            "name": "string",
+            "image": "string",
+            "price": 10000,
+            "capital_price": 5000,
+            "description": "string",
+            "weight": 100,
+            "stock_amount": 10,
+            "minimum_order": 1,
+            "slug": "string",
+            "deleted_at": null,
+            "created_at": "2024-05-01 10:00:00",
+            "updated_at": "2024-05-01 10:00:00"
+        }
+   ]
 }
 
-PUT /api/admin/category/{id} (200 Success)
+PUT /api/admin/products/{id} (200 Success)
 {
     "success": true,
-    "message": "data kategori berhasil di update"
+    "message": "data product berhasil di update",
+    "Productdata": [
+        {
+            "id": "string",
+            "categories_id": "string",
+            "category_name": "string",
+            "name": "string",
+            "image": "string",
+            "price": 10000,
+            "capital_price": 5000,
+            "description": "string",
+            "weight": 100,
+            "stock_amount": 10,
+            "minimum_order": 1,
+            "slug": "string",
+            "deleted_at": null,
+            "created_at": "2024-05-01 10:00:00",
+            "updated_at": "2024-05-01 10:00:00"
+        }
+   ]
 }
 
-DELETE /api/admin/category/{id} (200 Success)
+DELETE /api/admin/products/{id} (200 Success)
 {
     "success": true,
-    "message": "data kategori berhasil dihapus"
+    "message": "data product berhasil dihapus",
 }
 
 {
     "success": false,
-    "message": "error (bisa kategori gagal ditambahkan, error bad request, atau internal server error tergantung method yang digunakan)"
+    "message": "error (pesan disesuaikan, misalnya data tidak lengkap, gagal ditambahkan, bad request, atau internal server error tergantung case-nya)"
 }
 
 jelaskan tahapan2 yang harus dilakukan untuk implementasi fitur ini anggap nanti yang mengimplementasikan adalah junior programmer atau mode ai yang lebih murah
@@ -134,10 +261,9 @@ dan tidak perlu penjelasan dengan kode hanya detail apa saja yang harus dilakuka
 
 isi dari planing nya adalah sebagai berikut : 
 
-untuk membuat tampilan halaman admin yang nanti akan digunakan untuk crud product dan kategories termasuk mengelihat usernya siapa saja dan melihat dasboard 
-untuk tampilan nya sudah seperti yang saya screenshot untuk halaman admin nya 
-untuk dashboard samakan untuk halaman category dan product juga sama menyamping gitu buatkan card bisa di edit dan delete 4 card berjejer gitu 
-tolong sekalian buatkan navbar dan sidebarnya juga seperti yang saya screenshot
+untuk membuat tampilan halaman detail product dimana menampilkan keterangan produk sebelum user melakukan checkout
+untuk tampilan nya seperti yang saya screenshot untuk halaman detail produk nya 
+tampilan nya muncul ketika user klik product tersebut, buatkan saja dulu static halaman nya sebelum connect ke api 
 
 jelaskan tahapan2 yang harus dilakukan untuk implementasi fitur ini anggap nanti yang mengimplementasikan adalah junior programmer atau mode ai yang lebih murah
 dan tidak perlu penjelasan dengan kode hanya detail apa saja yang harus dilakukan 

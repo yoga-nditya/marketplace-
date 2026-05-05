@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Product } from "@/services/productService";
 
 interface ProductCardProps {
@@ -32,7 +33,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div 
+    <Link 
+      href={`/products/${product.id}`}
       className={`border border-gray-100 rounded-xl overflow-hidden shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] p-3 transition-all duration-300 bg-white flex flex-col h-full group ${
         isOutOfStock 
           ? "grayscale opacity-75 cursor-not-allowed pointer-events-none" 
@@ -94,6 +96,7 @@ export default function ProductCard({ product }: ProductCardProps) {
            </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
+
