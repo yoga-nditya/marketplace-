@@ -1,124 +1,63 @@
-# Perencanaan Integrasi Frontend: Halaman Admin Banner dengan API
-
-Dokumen ini berisi panduan tahap demi tahap untuk mengintegrasikan tampilan halaman Admin Banner (Frontend) dengan endpoint API `api/admin/banners` yang sudah tersedia di Backend.
+# Rencana Implementasi: Halaman Detail Produk (Static)
 
 ## Tujuan
-Membuat agar halaman daftar banner, form tambah banner, dan form edit banner di panel admin dapat mengambil (fetch), menambah, mengubah, dan menghapus data menggunakan API Admin Banners.
+Membuat tampilan antarmuka (UI) statis untuk halaman detail produk sesuai dengan desain mockup. Halaman ini akan muncul ketika pengguna mengklik suatu produk dari halaman daftar produk. Saat ini, implementasi hanya berfokus pada UI statis dan *state management* lokal (sebelum dihubungkan dengan API *backend*).
 
----
+## Struktur Halaman & Routing
+- Buat *folder* dan *file* halaman baru untuk detail produk, misalnya di `frontend/app/(portal)/products/[id]/page.tsx` (sesuaikan dengan struktur *routing* Next.js pada proyek ini).
+- Karena ini adalah versi statis, siapkan *dummy data* (data palsu statis) di dalam *file* halaman tersebut untuk merender UI.
 
-## Referensi API Backend yang Sudah Ada
+## Tahapan Implementasi
 
-### 1. GET `/api/admin/banners` (Mengambil Data)
-**Response (200 Success):**
-```json
-{
-   "success": true,
-   "message": "data berhasil ditemukan",
-   "Bannerdata": [
-        {
-            "id": "string",
-            "title": "string",
-            "image": "string",
-            "is_active": "integer",
-            "deleted_at": "timestamp | null",
-            "created_at": "timestamp",
-            "updated_at": "timestamp"
-        }
-   ]
-}
-```
+### 1. Persiapan Data Statis (Mock Data)
+Buat objek data statis sementara di dalam *file* untuk merender UI, yang berisi field:
+- `id` produk
+- Nama produk (contoh: "Cutting Acrylic 25x35cm")
+- Harga (contoh: 320000)
+- Kategori (contoh: "Hantaran")
+- Deskripsi (dengan *format* multi-baris jika perlu)
+- URL gambar produk
+- Jumlah stok (contoh: 5)
 
-### 2. POST `/api/admin/banners` (Tambah Data)
-**Request Body (FormData):**
-- `title`: string
-- `image`: file/string
-- `is_active`: integer (0 atau 1)
+### 2. Pembuatan Layout Utama & Breadcrumb
+- Buat *container* utama yang membatasi lebar maksimal halaman dan posisinya di tengah (mengikuti *layout* utama website/portal).
+- **Breadcrumb**: Buat komponen navigasi di bagian atas dengan struktur: ikon rumah (Beranda) > Produk > [Nama Produk]. Beri *styling* khusus agar elemen terakhir (nama produk) memiliki warna teks yang sedikit memudar (*muted*) sebagai penanda lokasi saat ini.
 
-**Response (201 Created):**
-```json
-{
-    "success": true,
-    "message": "data banners berhasil ditambahkan",
-    "Bannerdata": [
-        { ...struktur banner... }
-   ]
-}
-```
+### 3. Pembuatan Grid / Layout Konten
+Bagi area konten utama di bawah *breadcrumb* menjadi **3 kolom** (sangat disarankan menggunakan Tailwind CSS Grid, misalnya `grid-cols-1` di *mobile* dan `lg:grid-cols-12` pada layar *desktop*):
 
-### 3. PUT `/api/admin/banners/{id}` atau `?id={id}` (Update Data)
-**Request Body (FormData):** (Sama seperti POST, hanya field yang diubah)
+*   **Kolom Kiri (Gambar Produk) - proporsi misal `lg:col-span-4`:**
+    - Tampilkan gambar produk menggunakan komponen `<Image />` dari Next.js atau tag `<img>`.
+    - Berikan *styling* seperti bingkai (*border*) dan sudut melengkung (*rounded*) sesuai desain mockup.
 
-**Response (200 Success):**
-```json
-{
-    "success": true,
-    "message": "data banners berhasil di update",
-    "Bannerdata": [
-        { ...struktur banner... }
-   ]
-}
-```
+*   **Kolom Tengah (Informasi Detail Produk) - proporsi misal `lg:col-span-5`:**
+    - **Judul Produk**: Gunakan teks tebal (*font-bold*) dan ukuran cukup besar (*text-xl* atau *text-2xl*).
+    - **Harga**: Tampilkan harga di bawah judul dengan ukuran teks yang tebal dan besar. Implementasikan fungsi *helper* format Rupiah (contoh: "Rp 320.000").
+    - **Garis Pemisah (Divider)**: Tambahkan garis horizontal (`<hr />`) dengan warna abu-abu terang.
+    - **Kategori Produk**: Tampilkan judul teks "Kategori Produk" (beri warna aksen biru/ungu muda seperti pada mockup), diikuti teks nama kategori di bawahnya.
+    - **Garis Pemisah (Divider)**.
+    - **Deskripsi Produk**: Tampilkan judul teks "Deskripsi Produk" (warna aksen biru/ungu muda). Tampilkan teks deskripsi. 
+    - **Tombol "Selengkapnya"**: Buat tombol/badge kecil di ujung bawah teks deskripsi untuk indikasi meluaskan teks (bisa berbentuk *pill* dengan *background* warna terang).
 
-### 4. DELETE `/api/admin/banners/{id}` atau `?id={id}` (Hapus Data)
-**Response (200 Success):**
-```json
-{
-    "success": true,
-    "message": "data banners berhasil dihapus"
-}
-```
+*   **Kolom Kanan (Aksi & Keranjang) - proporsi misal `lg:col-span-3`:**
+    - Buat kotak *card* dengan *border* atau *shadow* tipis sebagai pembungkus area *checkout*.
+    - **Pilih Jumlah**: Tampilkan label "Pilih jumlah". Buat komponen *input counter*:
+        - Tombol `-` (kurang).
+        - Angka penunjuk kuantitas (di tengah, bentuk *input* atau *span* dengan bingkai).
+        - Tombol `+` (tambah).
+    - **Informasi Stok**: Teks ukuran kecil di bawah *counter* yang memberitahukan sisa stok (contoh: "Stok tersedia : 5").
+    - **Subtotal**: Teks "Subtotal" dan angka kalkulasi (harga satuan * kuantitas).
+    - **Tombol Aksi**: Tombol dengan lebar penuh (`w-full`), latar belakang warna solid (biru/ungu khas aplikasi), dan tulisan "Masukkan ke keranjang" dilengkapi ikon *cart* (keranjang belanja) di sebelah kirinya.
 
-### 5. Response Error (Global)
-```json
-{
-    "success": false,
-    "message": "error (pesan disesuaikan...)"
-}
-```
+### 4. Implementasi State Management (Client-side Interactivity)
+Gunakan `useState` (pastikan menambahkan direktif `"use client"` di baris paling atas *file* untuk komponen yang membutuhkan interaktivitas ini):
+- **State `quantity`**: Nilai *default* adalah 1.
+    - Buat fungsi penanganan (handler) untuk tombol `+` agar menambah *state* `quantity` sejumlah 1. Validasi: angka tidak boleh melebihi jumlah *stok* yang tersedia.
+    - Buat fungsi penanganan (handler) untuk tombol `-` agar mengurangi *state* `quantity`. Validasi: angka tidak boleh kurang dari 1.
+- **Perhitungan Subtotal**: Subtotal tidak harus disimpan di dalam *state*, cukup lakukan kalkulasi langsung pada saat dirender (contoh: `const subtotal = product.price * quantity`).
+- **State `isExpanded` (Opsional)**: Untuk fitur baca selengkapnya pada deskripsi. Jika teks panjang, potong sebagian dan tampilkan penuh hanya saat tombol "Selengkapnya" diklik (merubah nilai *state* dari `false` menjadi `true`).
 
----
-
-## Tahapan Implementasi Frontend (Action Plan)
-
-Bagi programmer atau model AI yang akan mengimplementasikan ini, silakan ikuti alur kerja berikut secara berurutan. **Penting:** Tampilan UI harus selaras dan mirip dengan modul Kategori dan Produk.
-
-### Tahap 1: Persiapan Service API (Frontend)
-1. Buat file service baru (misal: `services/adminBannerService.ts`).
-2. Definisikan antarmuka/tipe data (`interface` atau `type`) untuk objek Banner yang sesuai dengan struktur JSON dari backend.
-3. Buat 5 fungsi untuk melakukan pemanggilan HTTP menggunakan Axios atau Fetch:
-   - `fetchAdminBanners()`: Memanggil endpoint GET.
-   - `fetchBannerById(id)`: Memanggil endpoint GET dengan spesifik ID (untuk keperluan form edit).
-   - `createBanner(data)`: Memanggil endpoint POST. Pastikan *header* diset sebagai `multipart/form-data` karena ada upload gambar.
-   - `updateBanner(id, data)`: Memanggil endpoint PUT. Header juga `multipart/form-data`.
-   - `deleteBanner(id)`: Memanggil endpoint DELETE.
-
-### Tahap 2: Halaman Daftar Banner (List View)
-1. Buat halaman utama untuk admin banner (misal: `app/admin/banners/page.tsx`).
-2. Buat tabel data dengan kolom: ID, Gambar, Judul, Status (Aktif/Non-Aktif), dan Aksi.
-3. Gunakan `useEffect` untuk memanggil fungsi `fetchAdminBanners()` saat halaman pertama kali dimuat, dan simpan hasilnya di dalam state.
-4. Implementasikan fungsionalitas pendukung (mirip halaman produk):
-   - Kolom pencarian (Search).
-   - Pengurutan data (Sorting).
-   - Paginasi (Pagination).
-5. Pada kolom aksi, sediakan tombol **Edit** (mengarahkan ke rute edit) dan tombol **Delete**.
-6. Untuk tombol Delete, tampilkan konfirmasi menggunakan SweetAlert2 sebelum memanggil `deleteBanner(id)`. Jika sukses, *refresh* tabel data.
-
-### Tahap 3: Halaman Tambah Banner (Create View)
-1. Buat halaman form tambah (misal: `app/admin/banners/add/page.tsx`).
-2. Buat elemen form yang terdiri dari:
-   - Input teks untuk Judul.
-   - Dropdown (Select) untuk Status Aktif (1) atau Non-Aktif (0).
-   - Input file untuk Gambar (dilengkapi dengan *preview* gambar yang dipilih).
-3. Tangani *submit* form dengan mengemas data ke dalam objek `FormData`.
-4. Panggil fungsi `createBanner()`. Jika balikan JSON `success` bernilai true, tampilkan pop-up sukses dan arahkan (*redirect*) user kembali ke halaman daftar banner. Jika false, tampilkan pesan error.
-
-### Tahap 4: Halaman Edit Banner (Update View)
-1. Buat halaman form edit yang menerima ID dari parameter URL (misal: `app/admin/banners/edit/[id]/page.tsx`).
-2. Gunakan `useEffect` untuk memanggil `fetchBannerById(id)` dan jadikan responsenya sebagai *default value* pada inputan form.
-3. Sediakan struktur form yang persis sama dengan halaman Tambah Banner, namun informasikan bahwa input gambar bersifat opsional (jika tidak diunggah, tidak mengubah gambar lama).
-4. Saat disubmit, kemas perubahan ke dalam `FormData` dan panggil `updateBanner(id)`. Berikan notifikasi sukses/gagal lalu arahkan kembali ke halaman daftar.
-
-### Tahap 5: Integrasi Navigasi (Sidebar)
-1. Buka komponen Sidebar admin (`AdminSidebar.tsx`).
-2. Tambahkan menu baru bernama "Banner" dengan ikon yang merepresentasikan gambar, lalu arahkan tautannya ke `/admin/banners`.
+### 5. Penyesuaian Responsivitas (Responsive Design)
+Pastikan UI tidak hancur saat dibuka di ponsel:
+- Konfigurasi *grid* agar menjadi vertikal (semua *span* memenuhi lebar layar, misalnya ditumpuk dari gambar produk di urutan pertama, detail di kedua, dan area *checkout* di paling bawah).
+- Sesuaikan besaran jarak (*margin/padding*) antar elemen pada ukuran layar yang kecil.
