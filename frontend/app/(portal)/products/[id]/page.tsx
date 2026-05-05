@@ -1,23 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronRight, Home, Minus, Plus, ShoppingCart } from "lucide-react";
-
-// Mock data sesuai screenshot
-const mockProduct = {
-  id: 1,
-  name: "Cutting Acrylic 25x35cm",
-  price: 320000,
-  category: "Hantaran",
-  stock: 5,
-  description: `HARGA TERTERA UNTUK Cutting Acrylic 25x35cm
-- Ukuran : 25x35cm
-- Berat : 2 kg
-Format Tulisan:
-(TULIS DI PESAN NOTES SAAT CHECKOUT)...`,
-  image: "http://localhost:8080/assets/product/1777878341130102700.png",
-};
+import { useParams } from "next/navigation";
+import { ChevronRight, Home, Minus, Plus, ShoppingCart, Loader2 } from "lucide-react";
+import { fetchProductById, Product } from "@/services/productService";
+import { getImageUrl } from "@/services/utils";
 
 const formatRupiah = (number: number) => {
   return new Intl.NumberFormat("id-ID", {
@@ -28,11 +16,41 @@ const formatRupiah = (number: number) => {
 };
 
 export default function ProductDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
+  
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const [quantity, setQuantity] = useState(1);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  useEffect(() => {
+    const getProduct = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchProductById(id);
+        if (data) {
+          setProduct(data);
+        } else {
+          setError("Produk tidak ditemukan");
+        }
+      } catch (err) {
+        console.error("Error fetching product:", err);
+        setError("Gagal mengambil data produk");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      getProduct();
+    }
+  }, [id]);
+
   const increment = () => {
-    if (quantity < mockProduct.stock) {
+    if (product && quantity < product.stock_amount) {
       setQuantity(quantity + 1);
     }
   };
@@ -43,7 +61,38 @@ export default function ProductDetailPage() {
     }
   };
 
-  const subtotal = mockProduct.price * quantity;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-4" />
+        <p className="text-gray-500 font-medium">Memuat data produk...</p>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
+        <div className="text-center space-y-4">
+          <div className="bg-red-50 text-red-600 p-4 rounded-full inline-block mb-2">
+            <ShoppingCart size={48} className="opacity-50" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">{error || "Produk Tidak Ditemukan"}</h2>
+          <p className="text-gray-500 max-w-md mx-auto">
+            Maaf, produk yang Anda cari tidak tersedia atau terjadi kesalahan saat memuat data.
+          </p>
+          <Link 
+            href="/home" 
+            className="inline-block bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-md"
+          >
+            Kembali ke Beranda
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const subtotal = product.price * quantity;
 
   return (
     <div className="bg-white min-h-screen py-4 sm:py-8">
@@ -60,23 +109,20 @@ export default function ProductDetailPage() {
             Produk
           </Link>
           <ChevronRight size={14} className="text-gray-300" />
-          <span className="text-gray-400 truncate">{mockProduct.name}</span>
+          <span className="text-gray-400 truncate">{product.name}</span>
         </nav>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* Kolom Kiri: Gambar Produk (Diperkecil) */}
+          {/* Kolom Kiri: Gambar Produk */}
           <div className="lg:col-span-3">
             <div className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm sticky top-24">
               <div className="relative aspect-square w-full bg-gray-50">
                 <img
-                  src={mockProduct.image}
-                  alt={mockProduct.name}
+                  src={getImageUrl(product.image, "product")}
+                  alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://via.placeholder.com/600x600?text=Product+Image";
-                  }}
                 />
               </div>
             </div>
@@ -86,17 +132,17 @@ export default function ProductDetailPage() {
           <div className="lg:col-span-6 space-y-6">
             <div className="space-y-1">
               <h1 className="text-xl font-bold text-black leading-tight">
-                {mockProduct.name}
+                {product.name}
               </h1>
               <p className="text-2xl font-black text-black">
-                {formatRupiah(mockProduct.price)}
+                {formatRupiah(product.price)}
               </p>
             </div>
 
             <div className="space-y-4 pt-2">
               <div className="space-y-1">
                 <h3 className="text-indigo-600 font-bold text-xs uppercase tracking-wider">Kategori Produk</h3>
-                <p className="text-black font-medium text-sm">{mockProduct.category}</p>
+                <p className="text-black font-medium text-sm">{product.categories_id}</p>
               </div>
 
               <div className="w-full h-[1px] bg-gray-100"></div>
@@ -104,14 +150,16 @@ export default function ProductDetailPage() {
               <div className="space-y-2.5">
                 <h3 className="text-indigo-600 font-bold text-xs uppercase tracking-wider">Deskripsi Produk</h3>
                 <div className={`text-black leading-relaxed text-[15px] whitespace-pre-line ${!isExpanded ? 'line-clamp-4' : ''}`}>
-                  {mockProduct.description}
+                  {product.description || "Tidak ada deskripsi untuk produk ini."}
                 </div>
-                <button 
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-indigo-600 text-xs font-bold hover:underline"
-                >
-                  {isExpanded ? "Lihat Lebih Sedikit" : "Selengkapnya"}
-                </button>
+                {product.description && product.description.length > 200 && (
+                  <button 
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-indigo-600 text-xs font-bold hover:underline"
+                  >
+                    {isExpanded ? "Lihat Lebih Sedikit" : "Selengkapnya"}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -125,7 +173,8 @@ export default function ProductDetailPage() {
               <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden w-full mb-4">
                 <button 
                   onClick={decrement}
-                  className="p-2.5 hover:bg-gray-50 transition-colors text-gray-500 active:bg-gray-100"
+                  className="p-2.5 hover:bg-gray-50 transition-colors text-gray-500 active:bg-gray-100 disabled:opacity-30"
+                  disabled={quantity <= 1}
                 >
                   <Minus size={18} />
                 </button>
@@ -134,7 +183,8 @@ export default function ProductDetailPage() {
                 </div>
                 <button 
                   onClick={increment}
-                  className="p-2.5 hover:bg-gray-50 transition-colors text-gray-500 active:bg-gray-100"
+                  className="p-2.5 hover:bg-gray-50 transition-colors text-gray-500 active:bg-gray-100 disabled:opacity-30"
+                  disabled={product ? quantity >= product.stock_amount : true}
                 >
                   <Plus size={18} />
                 </button>
@@ -142,7 +192,9 @@ export default function ProductDetailPage() {
 
               <div className="flex justify-between items-center mb-6 text-xs bg-gray-50 p-2.5 rounded-lg border border-gray-100">
                 <span className="text-gray-500 font-medium">Stok tersedia:</span>
-                <span className="font-bold text-black">{mockProduct.stock}</span>
+                <span className={`font-bold ${product.stock_amount > 0 ? 'text-black' : 'text-red-600'}`}>
+                  {product.stock_amount}
+                </span>
               </div>
 
               <div className="space-y-0.5 mb-6">
@@ -152,9 +204,12 @@ export default function ProductDetailPage() {
                 </p>
               </div>
 
-              <button className="w-full bg-indigo-600 text-white py-3.5 px-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all text-sm shadow-md active:scale-[0.98]">
+              <button 
+                disabled={product.stock_amount <= 0}
+                className="w-full bg-indigo-600 text-white py-3.5 px-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all text-sm shadow-md active:scale-[0.98] disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
                 <ShoppingCart size={18} />
-                <span>Masukkan ke keranjang</span>
+                <span>{product.stock_amount > 0 ? "Masukkan ke keranjang" : "Stok Habis"}</span>
               </button>
             </div>
           </div>
